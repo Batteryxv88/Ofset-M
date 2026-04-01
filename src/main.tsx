@@ -6,17 +6,20 @@ import { store } from './app/store';
 import './index.scss';
 import App from './App.tsx';
 
-// GitHub Pages SPA fallback: /?p=<original_path>
+// GitHub Pages SPA fallback: /Ofset-M/?p=<original_path>
 const sp = new URLSearchParams(window.location.search);
 const p = sp.get('p');
 if (p) {
   window.history.replaceState(null, '', decodeURIComponent(p));
 }
 
+// basename совпадает с vite base — без него react-router не матчит /Ofset-M/*
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <App />
       </BrowserRouter>
     </Provider>
