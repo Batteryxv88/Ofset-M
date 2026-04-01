@@ -1,0 +1,260 @@
+// Переменные для цветов статусов
+:root {
+  --ij-status-active: rgba(99, 102, 241, 0.8);
+  --ij-status-done:   rgba(74, 222, 128, 0.8);
+  --ij-status-pause:  rgba(251, 191, 36, 0.8);
+  --ij-status-cancel: rgba(248, 113, 113, 0.8);
+}
+
+// ── Карточка виджета ──────────────────────────────────────────
+.ij-jobs {
+  border-radius: 16px !important;
+  padding: 20px 24px;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 2px;
+  }
+
+  &__title {
+    margin-bottom: 2px !important;
+  }
+
+  &__divider {
+    margin: 14px 0 !important;
+  }
+
+  &__msg {
+    display: block;
+    padding: 4px 0;
+  }
+
+  &__empty {
+    padding: 20px 0;
+    text-align: center;
+    opacity: 0.5;
+  }
+
+  // Горизонтальный скролл для широкой таблицы
+  &__wrap {
+    overflow-x: auto;
+    margin: 0 -4px;
+    padding: 0 4px;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    white-space: nowrap;
+
+    thead tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    th {
+      padding: 0 10px 8px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.3);
+
+      &.num { text-align: right; }
+      &.act { width: 36px; }
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.12s;
+
+      &:last-child { border-bottom: none; }
+      &:hover { background: rgba(255, 255, 255, 0.025); }
+    }
+
+    td {
+      padding: 9px 10px;
+      vertical-align: middle;
+      color: rgba(255, 255, 255, 0.85);
+
+      &.num { text-align: right; font-variant-numeric: tabular-nums; }
+      &.act { text-align: center; padding: 6px 6px; }
+    }
+  }
+
+  &__order {
+    font-family: monospace;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  &__edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.2);
+    transition: background 0.13s, color 0.13s;
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.14);
+      color: #a5b4fc;
+    }
+  }
+}
+
+// ── Бейдж типа (УФ / Ширка) ───────────────────────────────────
+.ij-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+
+  &--uv {
+    background: rgba(167, 139, 250, 0.18);
+    color: #c4b5fd;
+  }
+
+  &--wide {
+    background: rgba(34, 211, 238, 0.14);
+    color: #67e8f9;
+  }
+}
+
+// ── Бейдж статуса ─────────────────────────────────────────────
+.ij-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--status-color, rgba(255,255,255,0.15));
+  color: var(--status-color, rgba(255,255,255,0.6));
+}
+
+// ── Диалог редактирования ─────────────────────────────────────
+.ij-dialog {
+  background: #1a1d2e !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+
+  &__title {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  }
+
+  &__body {
+    padding-top: 16px !important;
+  }
+
+  &__error {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  &__actions {
+    padding: 12px 20px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    gap: 8px;
+  }
+}
+
+// ── Поля диалога (аналогично ij-form) ────────────────────────
+.ij-edit {
+  &__row {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    &--1 { grid-template-columns: 1fr; }
+    &--2 { grid-template-columns: 1fr 1fr; }
+    &--3 { grid-template-columns: repeat(3, 1fr); }
+
+    @media (max-width: 480px) {
+      &--2, &--3 { grid-template-columns: 1fr; }
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__input,
+  &__select,
+  &__textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    color: inherit;
+    font-size: 13px;
+    padding: 6px 9px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:focus { border-color: rgba(99, 102, 241, 0.6); }
+    &::placeholder { color: rgba(255, 255, 255, 0.2); }
+  }
+
+  &__input--date { color-scheme: dark; }
+
+  &__select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.35)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+    cursor: pointer;
+    option { background: #1a1d2e; color: #fff; }
+  }
+
+  &__textarea {
+    resize: vertical;
+    min-height: 52px;
+    font-family: inherit;
+  }
+
+  &__dur-wrap {
+    display: flex;
+    gap: 4px;
+  }
+
+  &__input--dur {
+    flex: 1;
+    min-width: 0;
+    &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { -webkit-appearance: none; }
+  }
+
+  &__select--unit {
+    width: 52px;
+    flex-shrink: 0;
+    padding: 6px 4px;
+    text-align: center;
+  }
+}

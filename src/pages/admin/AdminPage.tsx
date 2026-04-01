@@ -6,11 +6,15 @@ import { getPrintRunsInPeriod, calcBonuses } from '../../features/admin';
 import type { UserBonusSummary } from '../../features/admin';
 import { AppHeader } from '../../widgets/app-header';
 import { SettingsPanel } from '../../widgets/settings-panel';
+import { InkjetOptionsPanel } from '../../widgets/inkjet-options-panel';
 import { getBillingPeriod, formatNum, formatRub } from '../../shared/lib';
 import './AdminPage.scss';
 
+type AdminSection = 'laser' | 'inkjet';
+
 const AdminPage = () => {
   const settings = useSelector((state: RootState) => state.settings.values);
+  const [section, setSection] = useState<AdminSection>('laser');
 
   // Мемоизируем период — без этого новые Date() каждый рендер вызывают бесконечный цикл
   const period = useMemo(
@@ -67,6 +71,30 @@ const AdminPage = () => {
       <AppHeader />
 
       <div className="admin-page__content">
+
+        {/* Переключатель разделов */}
+        <div className="admin-page__sections">
+          <button
+            className={`admin-page__section-tab ${section === 'laser' ? 'admin-page__section-tab--active' : ''}`}
+            onClick={() => setSection('laser')}
+          >
+            Лазерная печать
+          </button>
+          <button
+            className={`admin-page__section-tab ${section === 'inkjet' ? 'admin-page__section-tab--active' : ''}`}
+            onClick={() => setSection('inkjet')}
+          >
+            Струйная печать
+          </button>
+        </div>
+
+        {/* Струйная секция */}
+        {section === 'inkjet' && (
+          <InkjetOptionsPanel />
+        )}
+
+        {/* Лазерная секция */}
+        {section === 'laser' && (
         <div className="admin-page__layout">
 
           {/* Левая колонка: настройки */}
@@ -223,6 +251,8 @@ const AdminPage = () => {
           </div>
 
         </div>
+        )} {/* end laser section */}
+
       </div>
     </div>
   );

@@ -49,13 +49,20 @@ const AppHeader = () => {
         {isAdmin && (
           <nav className="app-header__nav">
             <NavLink
-              to="/"
-              end
+              to="/laser"
               className={({ isActive }) =>
                 `app-header__nav-link ${isActive ? 'app-header__nav-link--active' : ''}`
               }
             >
-              Дашборд
+              Лазерная
+            </NavLink>
+            <NavLink
+              to="/inkjet"
+              className={({ isActive }) =>
+                `app-header__nav-link ${isActive ? 'app-header__nav-link--active' : ''}`
+              }
+            >
+              Струйная
             </NavLink>
             <NavLink
               to="/admin"

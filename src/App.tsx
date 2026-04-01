@@ -9,12 +9,18 @@ import { fetchSettings } from './features/settings';
 import { supabase } from './shared/api/supabaseClient';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import InkjetDashboardPage from './pages/inkjet-dashboard/InkjetDashboardPage';
 import AdminPage from './pages/admin/AdminPage';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
-  const isAdmin = user?.role === 'admin';
+  const isAdmin    = user?.role === 'admin';
+  const isInkjet   = user?.role === 'inkjet_printer';
+  const isLaser    = user?.role === 'laser_printer';
+
+  // Куда перенаправить после логина — зависит от роли
+  const defaultPath = isInkjet ? '/inkjet' : '/laser';
 
   useEffect(() => {
     dispatch(fetchSettings());
@@ -72,27 +78,49 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Routes>
+        {/* Лазерная печать (laser_printer + admin) */}
         <Route
-          path="/"
-          element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+          path="/laser"
+          element={
+            !user ? <Navigate to="/login" replace /> :
+            (isAdmin || isLaser) ? <DashboardPage /> :
+            <Navigate to={defaultPath} replace />
+          }
         />
+
+        {/* Струйная печать (inkjet_printer + admin) */}
+        <Route
+          path="/inkjet"
+          element={
+            !user ? <Navigate to="/login" replace /> :
+            (isAdmin || isInkjet) ? <InkjetDashboardPage /> :
+            <Navigate to={defaultPath} replace />
+          }
+        />
+
+        {/* Административная страница */}
         <Route
           path="/admin"
           element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : isAdmin ? (
-              <AdminPage />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            !user ? <Navigate to="/login" replace /> :
+            isAdmin ? <AdminPage /> :
+            <Navigate to={defaultPath} replace />
           }
         />
+
+        {/* Логин */}
         <Route
           path="/login"
-          element={user ? <Navigate to="/" replace /> : <LoginPage />}
+          element={user ? <Navigate to={defaultPath} replace /> : <LoginPage />}
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* Fallback: корень → дефолтный дашборд */}
+        <Route
+          path="/"
+          element={user ? <Navigate to={defaultPath} replace /> : <Navigate to="/login" replace />}
+        />
+
+        <Route path="*" element={<Navigate to={user ? defaultPath : '/login'} replace />} />
       </Routes>
     </ThemeProvider>
   );

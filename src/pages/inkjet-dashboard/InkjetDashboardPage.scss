@@ -1,0 +1,18 @@
+.inkjet-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inkjet-page__content {
+  flex: 1;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
+}
