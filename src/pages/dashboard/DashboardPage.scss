@@ -1,0 +1,34 @@
+// Страница — только каркас и сетка. Стили компонентов — в своих .scss файлах.
+
+.dashboard-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.dashboard-page__content {
+  flex: 1;
+  padding: 24px 28px;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
+}
+
+.dashboard-page__layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 16px;
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-page__col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

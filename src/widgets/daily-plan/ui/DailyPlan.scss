@@ -1,0 +1,54 @@
+.daily-plan {
+  padding: 20px;
+  border-radius: 16px !important;
+}
+
+.daily-plan__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.daily-plan__progress {
+  margin: 10px 0 0;
+  border-radius: 999px !important;
+  height: 2px !important;
+}
+
+.daily-plan__divider {
+  margin: 14px 0 !important;
+}
+
+.daily-plan__error {
+  margin-bottom: 14px;
+}
+
+.daily-plan__grid {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.daily-plan__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.daily-plan__printers {
+  opacity: 0.45;
+  letter-spacing: 0.02em;
+}
+
+.daily-plan__sep {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  align-self: stretch;
+  margin: 8px 0;
+}

@@ -1,0 +1,125 @@
+.bonus-summary {
+  border-radius: 16px !important;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bonus-summary__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.bonus-summary__title {
+  margin-bottom: 2px !important;
+}
+
+.bonus-summary__error {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.bonus-summary__total {
+  margin-bottom: 20px;
+}
+
+.bonus-summary__amount {
+  font-weight: 700 !important;
+  color: #a5b4fc;
+  line-height: 1.1 !important;
+  margin-bottom: 8px !important;
+}
+
+.bonus-summary__breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bonus-summary__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &--color {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+  }
+
+  &--bw {
+    background: rgba(129, 140, 248, 0.12);
+    color: #a5b4fc;
+  }
+
+  &--layout {
+    background: rgba(165, 180, 252, 0.1);
+    color: #c7d2fe;
+  }
+}
+
+/* ─── Chart ─── */
+
+.bonus-summary__chart {
+  margin: 0 -4px;
+}
+
+.bonus-summary__chart-label {
+  display: block;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}
+
+.bonus-summary__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  opacity: 0.6;
+}
+
+/* ─── Tooltip ─── */
+
+.bonus-chart__tooltip {
+  background: #1e2130;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  min-width: 140px;
+}
+
+.bonus-chart__tooltip-date {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.bonus-chart__tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bonus-chart__tooltip-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bonus-chart__tooltip-total {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+  color: #a5b4fc;
+}

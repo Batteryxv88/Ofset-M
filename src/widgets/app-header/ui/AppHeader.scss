@@ -1,0 +1,129 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 28px;
+  height: 60px;
+  background: rgba(15, 17, 23, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  @media (max-width: 600px) {
+    padding: 0 16px;
+  }
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.app-header__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-header__title {
+  line-height: 1.2;
+}
+
+.app-header__date {
+  display: block;
+  text-transform: capitalize;
+}
+
+/* ─── Навигация для admin ─── */
+
+.app-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.app-header__nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &.app-header__nav-link--active {
+    color: #818cf8;
+    background: rgba(99, 102, 241, 0.12);
+  }
+}
+
+/* ─── Правая часть ─── */
+
+.app-header__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.app-header__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+
+  @media (max-width: 500px) {
+    display: none;
+  }
+}
+
+.app-header__name {
+  line-height: 1.2;
+  font-weight: 500 !important;
+}
+
+.app-header__role {
+  opacity: 0.6;
+}
+
+.app-header__avatar-btn {
+  padding: 0 !important;
+}
+
+.app-header__avatar {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.82;
+  }
+}
