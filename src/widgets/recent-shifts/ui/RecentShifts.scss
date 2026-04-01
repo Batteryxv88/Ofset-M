@@ -1,0 +1,224 @@
+// ── Обёртка (Paper) ───────────────────────────────────────────────
+.recent-shifts {
+  border-radius: 16px !important;
+  padding: 20px 24px;
+
+  &__header {
+    margin-bottom: 2px;
+  }
+
+  &__title {
+    margin-bottom: 1px !important;
+  }
+
+  &__divider {
+    margin: 14px 0 !important;
+  }
+
+  &__loader {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0.4;
+  }
+
+  &__error {
+    display: block;
+    padding: 4px 0;
+  }
+
+  &__empty {
+    padding: 16px 0;
+    opacity: 0.5;
+  }
+
+  // Две колонки смен рядом с вертикальным разделителем
+  &__body {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  &__vsep {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 0 24px;
+    align-self: stretch;
+    flex-shrink: 0;
+  }
+}
+
+// ── Одна колонка-смена ─────────────────────────────────────────────
+.rs-shift {
+  flex: 1;
+  min-width: 0;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  &__date {
+    font-weight: 600 !important;
+  }
+
+  &__error {
+    display: block;
+    margin-bottom: 6px;
+  }
+}
+
+// ── Таблица ────────────────────────────────────────────────────────
+.rs-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  th {
+    padding: 0 10px 8px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.3);
+
+    &.num { text-align: right; }
+    &.act  { width: 44px; }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.12s;
+
+    &:last-child { border-bottom: none; }
+
+    &:hover { background: rgba(255, 255, 255, 0.025); }
+
+    &.rs-table__row--editing {
+      background: rgba(99, 102, 241, 0.07);
+    }
+  }
+
+  td {
+    padding: 9px 10px;
+    font-size: 13px;
+    vertical-align: middle;
+
+    &.num { text-align: right; font-variant-numeric: tabular-nums; }
+    &.act  { text-align: center; padding: 6px 6px; }
+  }
+
+  &__time {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__val--saved {
+    color: #4ade80;
+    transition: color 0.4s;
+  }
+}
+
+// ── Бейдж принтера ─────────────────────────────────────────────────
+.rs-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+
+  &--color {
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+  }
+
+  &--bw {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+  }
+}
+
+// ── Инпут редактирования ───────────────────────────────────────────
+.rs-input {
+  width: 68px;
+  padding: 4px 7px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  border-radius: 6px;
+  color: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:focus {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+// ── Кнопки действий ───────────────────────────────────────────────
+.rs-actions {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+
+.rs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background 0.13s, color 0.13s;
+
+  &--edit {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.14);
+      color: #a5b4fc;
+    }
+  }
+
+  &--save {
+    background: rgba(99, 102, 241, 0.18);
+    color: #a5b4fc;
+
+    &:hover:not(:disabled) { background: rgba(99, 102, 241, 0.32); }
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+  }
+
+  &--cancel {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.35);
+
+    &:hover:not(:disabled) {
+      background: rgba(248, 113, 113, 0.14);
+      color: #f87171;
+    }
+
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+  }
+}

@@ -7,6 +7,7 @@ import { PrintRunForm } from '../../widgets/print-run-form';
 import { DailyPlan } from '../../widgets/daily-plan';
 import { PrinterSummary } from '../../widgets/printer-summary';
 import { BonusSummary } from '../../widgets/bonus-summary';
+import { RecentShifts } from '../../widgets/recent-shifts';
 import './DashboardPage.scss';
 
 type SummaryRow = {
@@ -22,8 +23,9 @@ const DashboardPage = () => {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
 
-  // Инкремент при каждой новой записи → BonusSummary обновляется
+  // Инкремент при каждой новой записи → обновляются BonusSummary и RecentShifts
   const [bonusTrigger, setBonusTrigger] = useState(0);
+  const [shiftsTrigger, setShiftsTrigger] = useState(0);
   const isMounted = useRef(true);
 
   const totals = useMemo(() => {
@@ -52,6 +54,12 @@ const DashboardPage = () => {
   }, [user?.id]);
 
   const handleSaved = useCallback(() => {
+    refreshSummary();
+    setBonusTrigger((n) => n + 1);
+    setShiftsTrigger((n) => n + 1);
+  }, [refreshSummary]);
+
+  const handleShiftUpdated = useCallback(() => {
     refreshSummary();
     setBonusTrigger((n) => n + 1);
   }, [refreshSummary]);
@@ -89,6 +97,17 @@ const DashboardPage = () => {
             />
             <BonusSummary refreshTrigger={bonusTrigger} />
           </div>
+
+          {/* Последние смены — на всю ширину под двумя колонками */}
+          {user?.id && (
+            <div className="dashboard-page__full-width">
+              <RecentShifts
+                key={shiftsTrigger}
+                userId={user.id}
+                onUpdated={handleShiftUpdated}
+              />
+            </div>
+          )}
 
         </div>
       </div>

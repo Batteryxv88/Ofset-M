@@ -32,3 +32,8 @@
   flex-direction: column;
   gap: 16px;
 }
+
+.dashboard-page__full-width {
+  grid-column: 1 / -1;
+  padding-top: 4px;
+}
