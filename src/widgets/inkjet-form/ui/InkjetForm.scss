@@ -132,27 +132,6 @@
     font-family: inherit;
   }
 
-  // Поле длительности: [число][единица]
-  &__dur-wrap {
-    display: flex;
-    gap: 4px;
-  }
-
-  &__input--dur {
-    flex: 1;
-    min-width: 0;
-    // Скрываем стрелки у number
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button { -webkit-appearance: none; }
-  }
-
-  &__select--unit {
-    width: 58px;
-    flex-shrink: 0;
-    padding: 7px 6px;
-    text-align: center;
-  }
-
   // Подвал
   &__footer {
     display: flex;

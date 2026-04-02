@@ -8,30 +8,14 @@ import type { InkjetJob, InkjetOption, PrintType } from '../../../features/inkje
 import { ComboBox } from '../../../shared/ui/combo-box';
 import './InkjetJobs.scss';
 
-type DurUnit = 'min' | 'hour' | 'day';
-const DUR_UNITS: { value: DurUnit; label: string; factor: number }[] = [
-  { value: 'min',  label: 'мин', factor: 1 },
-  { value: 'hour', label: 'ч',   factor: 60 },
-  { value: 'day',  label: 'дн',  factor: 480 },
-];
-
-function minutesToDur(min: number | null): { val: string; unit: DurUnit } {
-  if (!min) return { val: '', unit: 'min' };
-  if (min % 480 === 0) return { val: String(min / 480), unit: 'day' };
-  if (min % 60 === 0)  return { val: String(min / 60),  unit: 'hour' };
-  return { val: String(min), unit: 'min' };
-}
-
-function durToMinutes(val: string, unit: DurUnit): number | null {
-  const n = parseFloat(val);
-  if (!val || isNaN(n) || n <= 0) return null;
-  return Math.round(n * DUR_UNITS.find((u) => u.value === unit)!.factor);
-}
-
 function formatDur(min: number | null): string {
   if (!min) return '—';
-  const d = minutesToDur(min);
-  return `${d.val} ${DUR_UNITS.find((u) => u.value === d.unit)!.label}`;
+  return `${min} мин`;
+}
+
+function toMin(v: string): number | null {
+  const n = parseInt(v, 10);
+  return v && !isNaN(n) && n > 0 ? n : null;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -45,50 +29,30 @@ const STATUS_COLORS: Record<string, string> = {
 type EditState = {
   manager: string; product_type: string; quantity: string;
   due_date: string; post_print: string;
-  setup_val: string; setup_unit: DurUnit;
+  setup_min: string;
   print_width_m: string; linear_meters: string; table_count: string;
-  print_val: string; print_unit: DurUnit;
-  post_print_val: string; post_print_unit: DurUnit;
+  print_min: string;
+  post_print_min: string;
   notes: string; status: string;
 };
 
 function jobToEdit(job: InkjetJob): EditState {
-  const setupDur  = minutesToDur(job.setup_minutes);
-  const printDur  = minutesToDur(job.print_minutes);
-  const postDur   = minutesToDur(job.post_print_minutes);
   return {
     manager:       job.manager       ?? '',
     product_type:  job.product_type  ?? '',
-    quantity:      job.quantity != null ? String(job.quantity) : '',
+    quantity:      job.quantity      != null ? String(job.quantity)      : '',
     due_date:      job.due_date      ?? '',
     post_print:    job.post_print    ?? '',
-    setup_val:  setupDur.val,  setup_unit:  setupDur.unit,
-    print_width_m: job.print_width_m  != null ? String(job.print_width_m)  : '',
-    linear_meters: job.linear_meters  != null ? String(job.linear_meters)  : '',
-    table_count:   job.table_count    != null ? String(job.table_count)    : '',
-    print_val:  printDur.val,  print_unit:  printDur.unit,
-    post_print_val: postDur.val, post_print_unit: postDur.unit,
+    setup_min:     job.setup_minutes != null ? String(job.setup_minutes) : '',
+    print_width_m: job.print_width_m != null ? String(job.print_width_m)  : '',
+    linear_meters: job.linear_meters != null ? String(job.linear_meters)  : '',
+    table_count:   job.table_count   != null ? String(job.table_count)    : '',
+    print_min:     job.print_minutes != null ? String(job.print_minutes) : '',
+    post_print_min: job.post_print_minutes != null ? String(job.post_print_minutes) : '',
     notes:  job.notes  ?? '',
     status: job.status ?? '',
   };
 }
-
-const DurField = ({ label, val, unit, onVal, onUnit }: {
-  label: string; val: string; unit: DurUnit;
-  onVal: (v: string) => void; onUnit: (u: DurUnit) => void;
-}) => (
-  <div className="ij-edit__field">
-    <label className="ij-edit__label">{label}</label>
-    <div className="ij-edit__dur-wrap">
-      <input type="number" min={0} className="ij-edit__input ij-edit__input--dur"
-        value={val} onChange={(e) => onVal(e.target.value)} />
-      <select className="ij-edit__select ij-edit__select--unit" value={unit}
-        onChange={(e) => onUnit(e.target.value as DurUnit)}>
-        {DUR_UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
-      </select>
-    </div>
-  </div>
-);
 
 const EditDialog = ({
   job, options, onClose, onSaved,
@@ -116,12 +80,12 @@ const EditDialog = ({
         quantity:      form.quantity     ? parseInt(form.quantity, 10)      : null,
         due_date:      form.due_date     || null,
         post_print:    form.post_print   || null,
-        setup_minutes: durToMinutes(form.setup_val, form.setup_unit),
+        setup_minutes: toMin(form.setup_min),
         print_width_m: form.print_width_m ? parseFloat(form.print_width_m) : null,
         linear_meters: form.linear_meters ? parseFloat(form.linear_meters) : null,
         table_count:   form.table_count   ? parseInt(form.table_count, 10) : null,
-        print_minutes:      durToMinutes(form.print_val,      form.print_unit),
-        post_print_minutes: durToMinutes(form.post_print_val, form.post_print_unit),
+        print_minutes:      toMin(form.print_min),
+        post_print_minutes: toMin(form.post_print_min),
         notes:  form.notes  || null,
         status: form.status || null,
       });
@@ -220,15 +184,21 @@ const EditDialog = ({
         )}
 
         <div className="ij-edit__row ij-edit__row--3">
-          <DurField label="Приладка"
-            val={form.setup_val} unit={form.setup_unit}
-            onVal={(v) => set('setup_val', v)} onUnit={(u) => set('setup_unit', u)} />
-          <DurField label="Время печати"
-            val={form.print_val} unit={form.print_unit}
-            onVal={(v) => set('print_val', v)} onUnit={(u) => set('print_unit', u)} />
-          <DurField label="Вр. постпечати"
-            val={form.post_print_val} unit={form.post_print_unit}
-            onVal={(v) => set('post_print_val', v)} onUnit={(u) => set('post_print_unit', u)} />
+          <div className="ij-edit__field">
+            <label className="ij-edit__label">Приладка, мин</label>
+            <input type="number" min={0} className="ij-edit__input"
+              value={form.setup_min} onChange={(e) => set('setup_min', e.target.value)} />
+          </div>
+          <div className="ij-edit__field">
+            <label className="ij-edit__label">Время печати, мин</label>
+            <input type="number" min={0} className="ij-edit__input"
+              value={form.print_min} onChange={(e) => set('print_min', e.target.value)} />
+          </div>
+          <div className="ij-edit__field">
+            <label className="ij-edit__label">Вр. постпечати, мин</label>
+            <input type="number" min={0} className="ij-edit__input"
+              value={form.post_print_min} onChange={(e) => set('post_print_min', e.target.value)} />
+          </div>
         </div>
 
         <div className="ij-edit__row ij-edit__row--1">

@@ -7,21 +7,11 @@ import type { InkjetOption, PrintType } from '../../../features/inkjet';
 import { ComboBox } from '../../../shared/ui/combo-box';
 import './InkjetForm.scss';
 
-type DurUnit = 'min' | 'hour' | 'day';
-const DUR_UNITS: { value: DurUnit; label: string; factor: number }[] = [
-  { value: 'min',  label: 'мин', factor: 1 },
-  { value: 'hour', label: 'ч',   factor: 60 },
-  { value: 'day',  label: 'дн',  factor: 480 },
-];
-
-function durToMinutes(val: string, unit: DurUnit): number | null {
-  const n = parseFloat(val);
-  if (!val || isNaN(n) || n <= 0) return null;
-  const f = DUR_UNITS.find((u) => u.value === unit)!.factor;
-  return Math.round(n * f);
-}
-
 const blank = (v: string) => v.trim() === '';
+const toMin = (v: string): number | null => {
+  const n = parseInt(v, 10);
+  return v && !isNaN(n) && n > 0 ? n : null;
+};
 
 type FormState = {
   print_type: PrintType;
@@ -31,12 +21,12 @@ type FormState = {
   quantity: string;
   due_date: string;
   post_print: string;
-  setup_val: string; setup_unit: DurUnit;
+  setup_min: string;
   print_width_m: string;
   linear_meters: string;
   table_count: string;
-  print_val: string; print_unit: DurUnit;
-  post_print_val: string; post_print_unit: DurUnit;
+  print_min: string;
+  post_print_min: string;
   notes: string;
   status: string;
 };
@@ -45,45 +35,12 @@ const INITIAL: FormState = {
   print_type: 'wide',
   order_number: '', manager: '', product_type: '', quantity: '',
   due_date: '', post_print: '',
-  setup_val: '', setup_unit: 'min',
+  setup_min: '',
   print_width_m: '', linear_meters: '', table_count: '',
-  print_val: '', print_unit: 'hour',
-  post_print_val: '', post_print_unit: 'min',
+  print_min: '',
+  post_print_min: '',
   notes: '', status: '',
 };
-
-// Компонент для ввода длительности
-const DurInput = ({
-  value, unit, onValue, onUnit, label,
-}: {
-  value: string; unit: DurUnit;
-  onValue: (v: string) => void;
-  onUnit: (u: DurUnit) => void;
-  label: string;
-}) => (
-  <div className="ij-form__field">
-    <label className="ij-form__label">{label}</label>
-    <div className="ij-form__dur-wrap">
-      <input
-        type="number"
-        min={0}
-        className="ij-form__input ij-form__input--dur"
-        placeholder="0"
-        value={value}
-        onChange={(e) => onValue(e.target.value)}
-      />
-      <select
-        className="ij-form__select ij-form__select--unit"
-        value={unit}
-        onChange={(e) => onUnit(e.target.value as DurUnit)}
-      >
-        {DUR_UNITS.map((u) => (
-          <option key={u.value} value={u.value}>{u.label}</option>
-        ))}
-      </select>
-    </div>
-  </div>
-);
 
 type Props = { onSaved?: () => void };
 
@@ -113,24 +70,22 @@ const InkjetForm = ({ onSaved }: Props) => {
     setSaving(true);
     try {
       await createInkjetJob(user.id, {
-        print_type: form.print_type,
-        order_number: parseInt(form.order_number, 10) || null,
-        manager:       blank(form.manager)       ? null : form.manager,
-        product_type:  blank(form.product_type)  ? null : form.product_type,
-        quantity:      blank(form.quantity)      ? null : parseInt(form.quantity, 10),
-        due_date:      blank(form.due_date)      ? null : form.due_date,
-        post_print:    blank(form.post_print)    ? null : form.post_print,
-        setup_minutes: durToMinutes(form.setup_val, form.setup_unit),
-        // wide-format
+        print_type:    form.print_type,
+        order_number:  parseInt(form.order_number, 10) || null,
+        manager:       blank(form.manager)      ? null : form.manager,
+        product_type:  blank(form.product_type) ? null : form.product_type,
+        quantity:      blank(form.quantity)     ? null : parseInt(form.quantity, 10),
+        due_date:      blank(form.due_date)     ? null : form.due_date,
+        post_print:    blank(form.post_print)   ? null : form.post_print,
+        setup_minutes: toMin(form.setup_min),
         print_width_m: form.print_type === 'wide' && !blank(form.print_width_m)
           ? parseFloat(form.print_width_m) : null,
         linear_meters: form.print_type === 'wide' && !blank(form.linear_meters)
           ? parseFloat(form.linear_meters) : null,
-        // uv
         table_count:   form.print_type === 'uv' && !blank(form.table_count)
           ? parseInt(form.table_count, 10) : null,
-        print_minutes:       durToMinutes(form.print_val,       form.print_unit),
-        post_print_minutes:  durToMinutes(form.post_print_val,  form.post_print_unit),
+        print_minutes:      toMin(form.print_min),
+        post_print_minutes: toMin(form.post_print_min),
         notes:  blank(form.notes)  ? null : form.notes,
         status: blank(form.status) ? 'В работе' : form.status,
       });
@@ -285,26 +240,38 @@ const InkjetForm = ({ onSaved }: Props) => {
         </div>
       )}
 
-      {/* ── Строка 4: Приладка · Время печати · Время постпечати */}
+      {/* ── Строка 4: Приладка · Время печати · Время постпечати (мин) */}
       <div className="ij-form__row ij-form__row--3">
-        <DurInput
-          label="Приладка"
-          value={form.setup_val} unit={form.setup_unit}
-          onValue={(v) => set('setup_val', v)}
-          onUnit={(u) => set('setup_unit', u)}
-        />
-        <DurInput
-          label="Время печати"
-          value={form.print_val} unit={form.print_unit}
-          onValue={(v) => set('print_val', v)}
-          onUnit={(u) => set('print_unit', u)}
-        />
-        <DurInput
-          label="Время постпечати"
-          value={form.post_print_val} unit={form.post_print_unit}
-          onValue={(v) => set('post_print_val', v)}
-          onUnit={(u) => set('post_print_unit', u)}
-        />
+        <div className="ij-form__field">
+          <label className="ij-form__label">Приладка, мин</label>
+          <input
+            type="number" min={0}
+            className="ij-form__input"
+            placeholder="0"
+            value={form.setup_min}
+            onChange={(e) => set('setup_min', e.target.value)}
+          />
+        </div>
+        <div className="ij-form__field">
+          <label className="ij-form__label">Время печати, мин</label>
+          <input
+            type="number" min={0}
+            className="ij-form__input"
+            placeholder="0"
+            value={form.print_min}
+            onChange={(e) => set('print_min', e.target.value)}
+          />
+        </div>
+        <div className="ij-form__field">
+          <label className="ij-form__label">Время постпечати, мин</label>
+          <input
+            type="number" min={0}
+            className="ij-form__input"
+            placeholder="0"
+            value={form.post_print_min}
+            onChange={(e) => set('post_print_min', e.target.value)}
+          />
+        </div>
       </div>
 
       {/* ── Строка 5: Постпечать (текст) ─────────────────────── */}
