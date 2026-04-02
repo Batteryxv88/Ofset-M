@@ -66,41 +66,34 @@ const CategoryList = ({
 
   return (
     <div className="ij-opt-cat">
-      <Typography variant="body2" className="ij-opt-cat__title">{label}</Typography>
+      <div className="ij-opt-cat__head">
+        <Typography variant="caption" className="ij-opt-cat__title">{label}</Typography>
+        {loading && <CircularProgress size={11} />}
+      </div>
 
-      {loading && <CircularProgress size={14} className="ij-opt-cat__loader" />}
-
-      <div className="ij-opt-cat__list">
+      {/* Чипы */}
+      <div className="ij-opt-cat__chips">
         {items.map((item) => (
-          <div key={item.id} className="ij-opt-cat__item">
-            <span className="ij-opt-cat__item-label">{item.label}</span>
+          <span key={item.id} className="ij-opt-cat__chip">
+            {item.label}
             <button
-              className="ij-opt-cat__del-btn"
+              className="ij-opt-cat__chip-del"
               onClick={() => handleDelete(item.id)}
               disabled={deletingId === item.id}
-              title="Удалить"
+              title={`Удалить «${item.label}»`}
             >
-              {deletingId === item.id ? (
-                <CircularProgress size={10} color="inherit" />
-              ) : (
-                '×'
-              )}
+              {deletingId === item.id
+                ? <CircularProgress size={9} color="inherit" />
+                : '×'}
             </button>
-          </div>
+          </span>
         ))}
         {!loading && items.length === 0 && (
-          <Typography variant="caption" color="text.secondary" className="ij-opt-cat__empty">
-            Список пуст
-          </Typography>
+          <span className="ij-opt-cat__empty">пусто</span>
         )}
       </div>
 
-      {error && (
-        <Typography variant="caption" color="error" className="ij-opt-cat__error">
-          {error}
-        </Typography>
-      )}
-
+      {/* Строка добавления */}
       <div className="ij-opt-cat__add">
         <input
           type="text"
@@ -116,9 +109,15 @@ const CategoryList = ({
           onClick={handleAdd}
           disabled={adding || !newVal.trim()}
         >
-          {adding ? <CircularProgress size={12} color="inherit" /> : '+ Добавить'}
+          {adding ? <CircularProgress size={11} color="inherit" /> : '+'}
         </button>
       </div>
+
+      {error && (
+        <Typography variant="caption" color="error" className="ij-opt-cat__error">
+          {error}
+        </Typography>
+      )}
     </div>
   );
 };

@@ -6,7 +6,7 @@
 }
 
 .settings-panel__header {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
   .settings-panel__title {
     margin-bottom: 2px !important;
@@ -27,8 +27,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 0;
+  gap: 12px;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
   &:last-child {
@@ -42,15 +42,41 @@
 }
 
 .settings-panel__row-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
   flex: 1;
   min-width: 0;
 }
 
+.settings-panel__row-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .settings-panel__row-label {
   font-weight: 500 !important;
+}
+
+.settings-panel__hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: help;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: border-color 0.15s, color 0.15s;
+  user-select: none;
+
+  &:hover {
+    border-color: #6366f1;
+    color: #a5b4fc;
+  }
 }
 
 .settings-panel__row-control {

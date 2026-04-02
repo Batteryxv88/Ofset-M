@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Alert, Button, CircularProgress, Typography } from '@mui/material';
+import { Alert, Button, CircularProgress, Tooltip, Typography } from '@mui/material';
 import type { AppDispatch, RootState } from '../../../app/store';
 import { saveSetting } from '../../../features/settings';
 import type { SettingKey } from '../../../features/settings';
@@ -112,12 +112,14 @@ const SettingsPanel = () => {
           return (
             <div key={key} className="settings-panel__row">
               <div className="settings-panel__row-info">
-                <Typography variant="body2" className="settings-panel__row-label">
-                  {meta.label}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {meta.description}
-                </Typography>
+                <div className="settings-panel__row-label-wrap">
+                  <Typography variant="body2" className="settings-panel__row-label">
+                    {meta.label}
+                  </Typography>
+                  <Tooltip title={meta.description} placement="top" arrow>
+                    <span className="settings-panel__hint" aria-label="Подсказка">?</span>
+                  </Tooltip>
+                </div>
               </div>
               <div className="settings-panel__row-control">
                 <input
