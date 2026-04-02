@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { getMyInkjetJobs, getInkjetOptions, updateInkjetJob } from '../../../features/inkjet';
 import type { InkjetJob, InkjetOption, PrintType } from '../../../features/inkjet';
+import { ComboBox } from '../../../shared/ui/combo-box';
 import './InkjetJobs.scss';
 
 type DurUnit = 'min' | 'hour' | 'day';
@@ -152,19 +153,23 @@ const EditDialog = ({
         <div className="ij-edit__row ij-edit__row--2">
           <div className="ij-edit__field">
             <label className="ij-edit__label">Менеджер</label>
-            <select className="ij-edit__select" value={form.manager}
-              onChange={(e) => set('manager', e.target.value)}>
-              <option value="">— не выбрано —</option>
-              {opt('manager').map((o) => <option key={o.id} value={o.label}>{o.label}</option>)}
-            </select>
+            <ComboBox
+              options={opt('manager').map((o) => o.label)}
+              value={form.manager}
+              onChange={(v) => set('manager', v)}
+              placeholder="— не выбрано —"
+              inputClassName="ij-edit__input"
+            />
           </div>
           <div className="ij-edit__field">
             <label className="ij-edit__label">Тип изделия</label>
-            <select className="ij-edit__select" value={form.product_type}
-              onChange={(e) => set('product_type', e.target.value)}>
-              <option value="">— не выбрано —</option>
-              {opt('product_type').map((o) => <option key={o.id} value={o.label}>{o.label}</option>)}
-            </select>
+            <ComboBox
+              options={opt('product_type').map((o) => o.label)}
+              value={form.product_type}
+              onChange={(v) => set('product_type', v)}
+              placeholder="— не выбрано —"
+              inputClassName="ij-edit__input"
+            />
           </div>
         </div>
 
@@ -181,11 +186,13 @@ const EditDialog = ({
           </div>
           <div className="ij-edit__field">
             <label className="ij-edit__label">Статус</label>
-            <select className="ij-edit__select" value={form.status}
-              onChange={(e) => set('status', e.target.value)}>
-              <option value="">— не выбрано —</option>
-              {opt('status').map((o) => <option key={o.id} value={o.label}>{o.label}</option>)}
-            </select>
+            <ComboBox
+              options={opt('status').map((o) => o.label)}
+              value={form.status}
+              onChange={(v) => set('status', v)}
+              placeholder="— не выбрано —"
+              inputClassName="ij-edit__input"
+            />
           </div>
         </div>
 

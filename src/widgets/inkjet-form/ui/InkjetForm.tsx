@@ -4,6 +4,7 @@ import { Button, CircularProgress, Divider, Paper, Typography } from '@mui/mater
 import type { RootState } from '../../../app/store';
 import { createInkjetJob, getInkjetOptions } from '../../../features/inkjet';
 import type { InkjetOption, PrintType } from '../../../features/inkjet';
+import { ComboBox } from '../../../shared/ui/combo-box';
 import './InkjetForm.scss';
 
 type DurUnit = 'min' | 'hour' | 'day';
@@ -192,29 +193,23 @@ const InkjetForm = ({ onSaved }: Props) => {
         </div>
         <div className="ij-form__field">
           <label className="ij-form__label">Менеджер</label>
-          <select
-            className="ij-form__select"
+          <ComboBox
+            options={opt('manager').map((o) => o.label)}
             value={form.manager}
-            onChange={(e) => set('manager', e.target.value)}
-          >
-            <option value="">— не выбрано —</option>
-            {opt('manager').map((o) => (
-              <option key={o.id} value={o.label}>{o.label}</option>
-            ))}
-          </select>
+            onChange={(v) => set('manager', v)}
+            placeholder="— не выбрано —"
+            inputClassName="ij-form__input"
+          />
         </div>
         <div className="ij-form__field">
           <label className="ij-form__label">Тип изделия</label>
-          <select
-            className="ij-form__select"
+          <ComboBox
+            options={opt('product_type').map((o) => o.label)}
             value={form.product_type}
-            onChange={(e) => set('product_type', e.target.value)}
-          >
-            <option value="">— не выбрано —</option>
-            {opt('product_type').map((o) => (
-              <option key={o.id} value={o.label}>{o.label}</option>
-            ))}
-          </select>
+            onChange={(v) => set('product_type', v)}
+            placeholder="— не выбрано —"
+            inputClassName="ij-form__input"
+          />
         </div>
       </div>
 
@@ -241,16 +236,13 @@ const InkjetForm = ({ onSaved }: Props) => {
         </div>
         <div className="ij-form__field">
           <label className="ij-form__label">Статус заказа</label>
-          <select
-            className="ij-form__select"
+          <ComboBox
+            options={opt('status').map((o) => o.label)}
             value={form.status}
-            onChange={(e) => set('status', e.target.value)}
-          >
-            <option value="">— не выбрано —</option>
-            {opt('status').map((o) => (
-              <option key={o.id} value={o.label}>{o.label}</option>
-            ))}
-          </select>
+            onChange={(v) => set('status', v)}
+            placeholder="— не выбрано —"
+            inputClassName="ij-form__input"
+          />
         </div>
       </div>
 

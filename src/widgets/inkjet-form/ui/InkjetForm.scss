@@ -2,6 +2,7 @@
 .ij-form {
   border-radius: 16px !important;
   padding: 20px 24px;
+  overflow: visible !important; // чтобы комбобокс не обрезался
 
   &__header {
     display: flex;
