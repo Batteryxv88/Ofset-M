@@ -24,10 +24,9 @@ const RingProgress = ({ progress, done, plan, loading = false }: Props) => {
 
   return (
     <svg
-      width={SIZE}
-      height={SIZE}
+      className="ring-progress"
       viewBox={`0 0 ${SIZE} ${SIZE}`}
-      style={{ display: 'block', margin: '0 auto' }}
+      style={{ display: 'block', margin: '0 auto', width: '100%', maxWidth: SIZE, height: 'auto' }}
     >
       {/* track */}
       <circle

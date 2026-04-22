@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Button, CircularProgress, Tooltip, Typography } from '@mui/material';
 import type { AppDispatch, RootState } from '../../../app/store';
@@ -6,22 +6,20 @@ import { saveSetting } from '../../../features/settings';
 import type { SettingKey } from '../../../features/settings';
 import './SettingsPanel.scss';
 
-const SETTING_ORDER: SettingKey[] = [
-  'calculation_day',
-  'min_run_color',
-  'min_run_bw',
-  'min_files',
-  'price_color',
-  'price_bw',
-  'price_layout',
-];
+export type SettingMeta = {
+  label: string;
+  description: string;
+  step: number;
+};
 
-const SETTING_META: Record<SettingKey, { label: string; description: string; step: number }> = {
+/** Мета-описания всех системных переменных */
+export const SETTING_META: Record<SettingKey, SettingMeta> = {
   calculation_day: {
     label: 'Дата расчёта (число месяца)',
     description: 'Период: с этого числа пред. месяца по (число − 1) текущего. Напр., 25 → период 25 фев – 24 мар.',
     step: 1,
   },
+  // Лазерная
   min_run_color: {
     label: 'Мин. тираж — цвет',
     description: 'Мин. листов за день. В зачёт идёт только сверх этого значения.',
@@ -52,18 +50,64 @@ const SETTING_META: Record<SettingKey, { label: string; description: string; ste
     description: 'Стоимость обработки одного файла/макета (руб.)',
     step: 1,
   },
+  // Струйная
+  inkjet_min_total_minutes: {
+    label: 'Мин. общее время за смену (мин)',
+    description: 'Порог суммарного времени (печать + постпечать + приладка) всех печатников за день. Если меньше — премия за этот день не начисляется.',
+    step: 10,
+  },
+  inkjet_norm_hours_per_worker: {
+    label: 'Норма часов на работника',
+    description: 'Норма часов на одного печатника в смену. Премия считается от часов сверх нормы.',
+    step: 0.5,
+  },
+  inkjet_rate_per_hour: {
+    label: 'Ставка премии за час (₽)',
+    description: 'Стоимость одного часа сверх нормы. Начисляется каждому печатнику смены в полном объёме.',
+    step: 1,
+  },
 };
 
-const SettingsPanel = () => {
+const DEFAULT_LASER_ORDER: SettingKey[] = [
+  'calculation_day',
+  'min_run_color',
+  'min_run_bw',
+  'min_files',
+  'price_color',
+  'price_bw',
+  'price_layout',
+];
+
+type Props = {
+  /** Какие ключи настроек показывать (порядок сохраняется). По умолчанию — лазерная печать. */
+  keys?: SettingKey[];
+  /** Заголовок панели */
+  title?: string;
+  /** Подзаголовок (caption) */
+  subtitle?: string;
+};
+
+const SettingsPanel = ({
+  keys = DEFAULT_LASER_ORDER,
+  title = 'Настройки системы',
+  subtitle = 'Переменные для расчёта премии',
+}: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const settings = useSelector((state: RootState) => state.settings.values);
 
   const [local, setLocal] = useState<Record<string, string>>(() =>
-    Object.fromEntries(SETTING_ORDER.map((k) => [k, String(settings[k])])),
+    Object.fromEntries(keys.map((k) => [k, String(settings[k])])),
   );
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
+
+  // Синхронизируем локальные значения при смене набора ключей
+  // (например, при переключении подвкладки) или при внешнем обновлении настроек.
+  useEffect(() => {
+    setLocal(Object.fromEntries(keys.map((k) => [k, String(settings[k])])));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keys.join(','), settings]);
 
   const handleChange = (key: SettingKey, val: string) => {
     setLocal((prev) => ({ ...prev, [key]: val }));
@@ -93,11 +137,13 @@ const SettingsPanel = () => {
     <div className="settings-panel">
       <div className="settings-panel__header">
         <Typography variant="h6" className="settings-panel__title">
-          Настройки системы
+          {title}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Переменные для расчёта премии
-        </Typography>
+        {subtitle && (
+          <Typography variant="caption" color="text.secondary">
+            {subtitle}
+          </Typography>
+        )}
       </div>
 
       {error && (
@@ -107,7 +153,7 @@ const SettingsPanel = () => {
       )}
 
       <div className="settings-panel__rows">
-        {SETTING_ORDER.map((key) => {
+        {keys.map((key) => {
           const meta = SETTING_META[key];
           return (
             <div key={key} className="settings-panel__row">
@@ -125,7 +171,7 @@ const SettingsPanel = () => {
                 <input
                   type="number"
                   className="settings-panel__input"
-                  value={local[key]}
+                  value={local[key] ?? ''}
                   step={meta.step}
                   min={0}
                   onChange={(e) => handleChange(key, e.target.value)}

@@ -1,0 +1,125 @@
+.inkjet-plan {
+  border-radius: 16px !important;
+  padding: 20px 24px;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
+}
+
+.inkjet-plan__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.inkjet-plan__progress {
+  margin-bottom: 8px !important;
+}
+
+.inkjet-plan__divider {
+  margin: 8px -24px 16px !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+
+  @media (max-width: 600px) {
+    margin: 8px -16px 14px !important;
+  }
+}
+
+.inkjet-plan__error {
+  margin-bottom: 12px !important;
+}
+
+.inkjet-plan__main {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: center;
+
+  // На мобильном уменьшить ring до 100px
+  @media (max-width: 600px) {
+    grid-template-columns: 100px 1fr;
+    gap: 14px;
+  }
+
+  // Очень узкие экраны — ring сверху, readout снизу
+  @media (max-width: 360px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .ring-progress {
+    max-width: 120px !important;
+
+    @media (max-width: 600px) {
+      max-width: 100px !important;
+    }
+  }
+}
+
+.inkjet-plan__readout {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.inkjet-plan__big {
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  margin-top: 1px !important;
+
+  @media (max-width: 600px) {
+    font-size: 1.1rem !important;
+  }
+}
+
+.inkjet-plan__status {
+  color: rgba(255, 255, 255, 0.55) !important;
+  margin-top: 4px !important;
+
+  &--ok {
+    color: #22c55e !important;
+    font-weight: 600 !important;
+  }
+}
+
+.inkjet-plan__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+.inkjet-plan__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.inkjet-plan__metric-value {
+  font-weight: 600 !important;
+
+  &--ok {
+    color: #22c55e !important;
+  }
+}
+
+.inkjet-plan__metric--bonus {
+  @media (max-width: 520px) {
+    grid-column: 1 / -1;
+  }
+}

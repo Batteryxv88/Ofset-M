@@ -8,11 +8,35 @@
 .inkjet-page__content {
   flex: 1;
   padding: 24px 28px;
+
+  @media (max-width: 900px) {
+    padding: 16px;
+  }
+  @media (max-width: 480px) {
+    padding: 12px 10px;
+  }
+}
+
+.inkjet-page__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 16px;
+  align-items: start;
+
+  @media (max-width: 1060px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.inkjet-page__col {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+}
 
-  @media (max-width: 600px) {
-    padding: 16px;
-  }
+.inkjet-page__full-width {
+  grid-column: 1 / -1;
+  padding-top: 4px;
 }

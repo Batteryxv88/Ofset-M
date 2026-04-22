@@ -1,6 +1,10 @@
 .daily-plan {
   padding: 20px;
   border-radius: 16px !important;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
 }
 
 .daily-plan__head {
@@ -9,6 +13,7 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 2px;
+  flex-wrap: wrap;
 }
 
 .daily-plan__progress {
@@ -29,21 +34,56 @@
   display: flex;
   align-items: flex-start;
   gap: 0;
+
+  // На узких экранах — сеткой 3 колонки без разделителей-палок
+  @media (max-width: 600px) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+
+    .daily-plan__sep {
+      display: none;
+    }
+  }
+
+  // Очень узкие (<= ~360) — в столбик
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 .daily-plan__item {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   padding: 4px 8px;
   text-align: center;
+
+  @media (max-width: 600px) {
+    padding: 4px 2px;
+  }
+
+  // Ограничение ring внутри grid-item, чтобы не выезжал
+  .ring-progress {
+    max-width: 120px !important;
+
+    @media (max-width: 600px) {
+      max-width: 100% !important;
+    }
+  }
 }
 
 .daily-plan__printers {
   opacity: 0.45;
   letter-spacing: 0.02em;
+
+  @media (max-width: 600px) {
+    font-size: 10px !important;
+  }
 }
 
 .daily-plan__sep {

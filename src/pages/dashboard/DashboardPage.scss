@@ -11,8 +11,11 @@
   flex: 1;
   padding: 24px 28px;
 
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
     padding: 16px;
+  }
+  @media (max-width: 480px) {
+    padding: 12px 10px;
   }
 }
 
@@ -24,6 +27,7 @@
 
   @media (max-width: 960px) {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 

@@ -2,19 +2,29 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  background: rgba(15, 17, 23, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: env(safe-area-inset-top);
+}
+
+.app-header__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 0 28px;
+  padding-left: max(28px, env(safe-area-inset-left));
+  padding-right: max(28px, env(safe-area-inset-right));
   height: 60px;
-  background: rgba(15, 17, 23, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
   @media (max-width: 600px) {
-    padding: 0 16px;
+    padding: 0 14px;
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+    height: 56px;
+    gap: 10px;
   }
 }
 
@@ -23,6 +33,11 @@
   align-items: center;
   gap: 24px;
   min-width: 0;
+  flex: 1;
+
+  @media (max-width: 640px) {
+    gap: 10px;
+  }
 }
 
 .app-header__brand {
@@ -30,6 +45,7 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .app-header__logo {
@@ -39,36 +55,74 @@
   flex-shrink: 0;
 }
 
+.app-header__brand-text {
+  min-width: 0;
+}
+
 .app-header__title {
   line-height: 1.2;
+  white-space: nowrap;
+
+  @media (max-width: 400px) {
+    font-size: 0.9rem !important;
+  }
 }
 
 .app-header__date {
   display: block;
   text-transform: capitalize;
+  white-space: nowrap;
+
+  @media (max-width: 400px) {
+    display: none;
+  }
 }
 
-/* ─── Навигация для admin ─── */
+/* ─── Навигация ───────────────────────────────────────── */
 
 .app-header__nav {
   display: flex;
   align-items: center;
   gap: 4px;
+}
 
+// Desktop: в верхней строке рядом с брендом
+.app-header__nav--desktop {
   @media (max-width: 640px) {
     display: none;
+  }
+}
+
+// Mobile: отдельная строка под хедером с горизонтальной прокруткой
+.app-header__nav--mobile {
+  display: none;
+
+  @media (max-width: 640px) {
+    display: flex;
+    padding: 8px 14px;
+    overflow-x: auto;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(15, 17, 23, 0.6);
+
+    // Скрыть скроллбар на мобильных
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
   }
 }
 
 .app-header__nav-link {
   display: inline-flex;
   align-items: center;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: color 0.15s, background 0.15s;
 
   &:hover {
@@ -79,6 +133,12 @@
   &.app-header__nav-link--active {
     color: #818cf8;
     background: rgba(99, 102, 241, 0.12);
+  }
+
+  @media (max-width: 640px) {
+    // Чуть крупнее тач-таргет на мобильных
+    padding: 8px 14px;
+    font-size: 13px;
   }
 }
 
@@ -96,6 +156,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 1px;
+  min-width: 0;
 
   @media (max-width: 500px) {
     display: none;
@@ -105,6 +166,10 @@
 .app-header__name {
   line-height: 1.2;
   font-weight: 500 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 .app-header__role {
@@ -125,5 +190,10 @@
 
   &:hover {
     opacity: 0.82;
+  }
+
+  @media (max-width: 600px) {
+    width: 32px !important;
+    height: 32px !important;
   }
 }

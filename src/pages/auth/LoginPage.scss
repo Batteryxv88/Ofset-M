@@ -53,6 +53,10 @@
 .login-form__submit {
   margin-top: 6px;
   height: 40px;
+
+  @media (max-width: 480px) {
+    height: 46px;
+  }
 }
 
 .login-form__spinner {

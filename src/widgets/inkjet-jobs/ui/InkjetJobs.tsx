@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogTitle, Divider, Paper, Typography,
+  DialogTitle, Divider, Paper, Typography, useMediaQuery,
 } from '@mui/material';
 import { getMyInkjetJobs, getInkjetOptions, updateInkjetJob } from '../../../features/inkjet';
-import type { InkjetJob, InkjetOption, PrintType } from '../../../features/inkjet';
+import type { InkjetJob, InkjetOption } from '../../../features/inkjet';
 import { ComboBox } from '../../../shared/ui/combo-box';
 import './InkjetJobs.scss';
 
@@ -63,6 +63,7 @@ const EditDialog = ({
   const [form, setForm] = useState<EditState>(() => jobToEdit(job));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useMediaQuery('(max-width: 600px)');
 
   const opt = (cat: InkjetOption['category']) =>
     options.filter((o) => o.category === cat);
@@ -99,8 +100,14 @@ const EditDialog = ({
   const isWide = job.print_type === 'wide';
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth
-      PaperProps={{ className: 'ij-dialog' }}>
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={isMobile}
+      PaperProps={{ className: 'ij-dialog' }}
+    >
       <DialogTitle className="ij-dialog__title">
         <span>Заказ #{job.order_number}</span>
         <span className={`ij-badge ij-badge--${job.print_type}`}>
@@ -294,77 +301,189 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
       )}
 
       {jobs.length > 0 && (
-        <div className="ij-jobs__wrap">
-          <table className="ij-jobs__table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Тип</th>
-                <th>Изделие</th>
-                <th className="num">Тираж</th>
-                <th>Менеджер</th>
-                <th>Статус</th>
-                <th>Сдача</th>
-                <th className="num">Ширина</th>
-                <th className="num">Погон. м</th>
-                <th className="num">Столов</th>
-                <th className="num">Приладка</th>
-                <th className="num">Печать</th>
-                <th className="num">Постпечать</th>
-                <th className="act" />
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((job) => (
-                <tr key={job.id}>
-                  <td className="ij-jobs__order">#{job.order_number ?? '—'}</td>
-                  <td>
+        <>
+          {/* ── Desktop: обычная таблица ─────────────────────────── */}
+          <div className="ij-jobs__wrap ij-jobs__wrap--desktop">
+            <table className="ij-jobs__table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Тип</th>
+                  <th>Изделие</th>
+                  <th className="num">Тираж</th>
+                  <th>Менеджер</th>
+                  <th>Статус</th>
+                  <th>Сдача</th>
+                  <th className="num">Ширина</th>
+                  <th className="num">Погон. м</th>
+                  <th className="num">Столов</th>
+                  <th className="num">Приладка</th>
+                  <th className="num">Печать</th>
+                  <th className="num">Постпечать</th>
+                  <th className="act" />
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((job) => (
+                  <tr key={job.id}>
+                    <td className="ij-jobs__order">#{job.order_number ?? '—'}</td>
+                    <td>
+                      <span className={`ij-badge ij-badge--${job.print_type}`}>
+                        {job.print_type === 'wide' ? 'Ширка' : 'УФ'}
+                      </span>
+                    </td>
+                    <td>{job.product_type ?? '—'}</td>
+                    <td className="num">{job.quantity ?? '—'}</td>
+                    <td>{job.manager ?? '—'}</td>
+                    <td>
+                      {job.status ? (
+                        <span
+                          className="ij-status"
+                          style={{ '--status-color': STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)' } as React.CSSProperties}
+                        >
+                          {job.status}
+                        </span>
+                      ) : '—'}
+                    </td>
+                    <td>
+                      {job.due_date
+                        ? new Date(job.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+                        : '—'}
+                    </td>
+                    <td className="num">{job.print_width_m  != null ? `${job.print_width_m} м`  : '—'}</td>
+                    <td className="num">{job.linear_meters   != null ? `${job.linear_meters} м`  : '—'}</td>
+                    <td className="num">{job.table_count     != null ? job.table_count             : '—'}</td>
+                    <td className="num">{formatDur(job.setup_minutes)}</td>
+                    <td className="num">{formatDur(job.print_minutes)}</td>
+                    <td className="num">{formatDur(job.post_print_minutes)}</td>
+                    <td className="act">
+                      <button
+                        className="ij-jobs__edit-btn"
+                        onClick={() => setEditing(job)}
+                        title="Редактировать"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                          <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5zM9.5 2.5L11 1l2 2-1.5 1.5"
+                            stroke="currentColor" strokeWidth="1.5"
+                            strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── Mobile: карточки ──────────────────────────────── */}
+          <div className="ij-jobs__cards">
+            {jobs.map((job) => (
+              <div key={job.id} className="ij-card">
+                <div className="ij-card__head">
+                  <div className="ij-card__head-left">
+                    <span className="ij-card__order">#{job.order_number ?? '—'}</span>
                     <span className={`ij-badge ij-badge--${job.print_type}`}>
                       {job.print_type === 'wide' ? 'Ширка' : 'УФ'}
                     </span>
-                  </td>
-                  <td>{job.product_type ?? '—'}</td>
-                  <td className="num">{job.quantity ?? '—'}</td>
-                  <td>{job.manager ?? '—'}</td>
-                  <td>
-                    {job.status ? (
-                      <span
-                        className="ij-status"
-                        style={{ '--status-color': STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)' } as React.CSSProperties}
-                      >
-                        {job.status}
-                      </span>
-                    ) : '—'}
-                  </td>
-                  <td>
-                    {job.due_date
-                      ? new Date(job.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-                      : '—'}
-                  </td>
-                  <td className="num">{job.print_width_m  != null ? `${job.print_width_m} м`  : '—'}</td>
-                  <td className="num">{job.linear_meters   != null ? `${job.linear_meters} м`  : '—'}</td>
-                  <td className="num">{job.table_count     != null ? job.table_count             : '—'}</td>
-                  <td className="num">{formatDur(job.setup_minutes)}</td>
-                  <td className="num">{formatDur(job.print_minutes)}</td>
-                  <td className="num">{formatDur(job.post_print_minutes)}</td>
-                  <td className="act">
-                    <button
-                      className="ij-jobs__edit-btn"
-                      onClick={() => setEditing(job)}
-                      title="Редактировать"
+                  </div>
+                  <button
+                    className="ij-card__edit"
+                    onClick={() => setEditing(job)}
+                    aria-label="Редактировать"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5zM9.5 2.5L11 1l2 2-1.5 1.5"
+                        stroke="currentColor" strokeWidth="1.5"
+                        strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Изменить</span>
+                  </button>
+                </div>
+
+                {/* Статус + дата сдачи */}
+                <div className="ij-card__status-row">
+                  {job.status ? (
+                    <span
+                      className="ij-status"
+                      style={{ '--status-color': STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)' } as React.CSSProperties}
                     >
-                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                        <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5zM9.5 2.5L11 1l2 2-1.5 1.5"
-                          stroke="currentColor" strokeWidth="1.5"
-                          strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      {job.status}
+                    </span>
+                  ) : <span className="ij-card__muted">без статуса</span>}
+                  {job.due_date && (
+                    <span className="ij-card__due">
+                      до {new Date(job.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
+                </div>
+
+                {/* Базовые поля: изделие, тираж, менеджер */}
+                <div className="ij-card__grid">
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Изделие</span>
+                    <span className="ij-card__value">{job.product_type ?? '—'}</span>
+                  </div>
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Тираж</span>
+                    <span className="ij-card__value">{job.quantity ?? '—'}</span>
+                  </div>
+                  <div className="ij-card__cell ij-card__cell--full">
+                    <span className="ij-card__label">Менеджер</span>
+                    <span className="ij-card__value">{job.manager ?? '—'}</span>
+                  </div>
+                </div>
+
+                {/* Специфичные поля для типа */}
+                {job.print_type === 'wide' ? (
+                  <div className="ij-card__grid">
+                    <div className="ij-card__cell">
+                      <span className="ij-card__label">Ширина</span>
+                      <span className="ij-card__value">
+                        {job.print_width_m != null ? `${job.print_width_m} м` : '—'}
+                      </span>
+                    </div>
+                    <div className="ij-card__cell">
+                      <span className="ij-card__label">Погонные</span>
+                      <span className="ij-card__value">
+                        {job.linear_meters != null ? `${job.linear_meters} м` : '—'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="ij-card__grid">
+                    <div className="ij-card__cell">
+                      <span className="ij-card__label">Столов</span>
+                      <span className="ij-card__value">{job.table_count ?? '—'}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Времена */}
+                <div className="ij-card__grid ij-card__grid--times">
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Приладка</span>
+                    <span className="ij-card__value">{formatDur(job.setup_minutes)}</span>
+                  </div>
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Печать</span>
+                    <span className="ij-card__value">{formatDur(job.print_minutes)}</span>
+                  </div>
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Постпечать</span>
+                    <span className="ij-card__value">{formatDur(job.post_print_minutes)}</span>
+                  </div>
+                </div>
+
+                {job.post_print && (
+                  <div className="ij-card__note">
+                    <span className="ij-card__label">Постпечать</span>
+                    <span className="ij-card__value ij-card__value--wrap">{job.post_print}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {editing && (

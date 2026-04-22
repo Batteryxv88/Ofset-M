@@ -13,10 +13,18 @@ body,
   width: 100%;
 }
 
+html {
+  // Предотвращаем автомасштабирование при ориентации на iOS
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  // Избегаем резких тапов при скролле, но сохраняем tap-to-focus
+  -webkit-tap-highlight-color: transparent;
 }
 
 #root {
@@ -24,20 +32,39 @@ body {
   flex-direction: column;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+// ── iOS / Android fix: предотвращаем авто-зум при фокусе на input ──
+// iOS Safari делает zoom, если font-size < 16px. На мобильных ставим 16px.
+@media (max-width: 768px) {
+  input[type='text'],
+  input[type='number'],
+  input[type='email'],
+  input[type='password'],
+  input[type='date'],
+  input[type='tel'],
+  input[type='search'],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+// ── Улучшенная ручка скролла на desktop, отсутствие артефактов на мобильном ──
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   }
 }

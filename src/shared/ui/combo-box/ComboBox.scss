@@ -12,8 +12,12 @@
   // здесь только позиционирование
   &__input {
     width: 100%;
-    padding-right: 28px !important; // место для стрелки
+    padding-right: 32px !important; // место для стрелки
     box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      padding-right: 40px !important;
+    }
   }
 
   &__arrow {
@@ -21,7 +25,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    width: 28px;
+    width: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,6 +35,10 @@
     color: rgba(255, 255, 255, 0.35);
     padding: 0;
     transition: color 0.15s, transform 0.15s;
+
+    @media (max-width: 768px) {
+      width: 40px;
+    }
 
     svg { display: block; transition: transform 0.15s; }
 
@@ -50,8 +58,9 @@
     background: #1e2130;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
-    max-height: 200px;
+    max-height: 240px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 
     // Тонкий скроллбар
@@ -63,11 +72,16 @@
   }
 
   &__option {
-    padding: 8px 12px;
+    padding: 10px 14px;
     font-size: 13px;
     cursor: pointer;
     transition: background 0.1s;
     border-radius: 0;
+
+    @media (max-width: 768px) {
+      padding: 12px 14px;
+      font-size: 14px;
+    }
 
     &:first-child { border-radius: 7px 7px 0 0; }
     &:last-child  { border-radius: 0 0 7px 7px; }

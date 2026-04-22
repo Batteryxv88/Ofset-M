@@ -3,6 +3,10 @@
   border-radius: 16px !important;
   padding: 20px 24px;
 
+  @media (max-width: 600px) {
+    padding: 16px 14px;
+  }
+
   &__header {
     margin-bottom: 2px;
   }
@@ -37,6 +41,11 @@
     display: flex;
     align-items: stretch;
     gap: 0;
+
+    // На мобильном — столбиком, разделитель горизонтальный
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
   }
 
   &__vsep {
@@ -45,6 +54,13 @@
     margin: 0 24px;
     align-self: stretch;
     flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      width: auto;
+      height: 1px;
+      margin: 14px 0;
+      align-self: stretch;
+    }
   }
 }
 
@@ -90,6 +106,11 @@
 
     &.num { text-align: right; }
     &.act  { width: 44px; }
+
+    @media (max-width: 480px) {
+      padding: 0 6px 6px;
+      font-size: 10px;
+    }
   }
 
   tbody tr {
@@ -112,6 +133,11 @@
 
     &.num { text-align: right; font-variant-numeric: tabular-nums; }
     &.act  { text-align: center; padding: 6px 6px; }
+
+    @media (max-width: 480px) {
+      padding: 8px 6px;
+      font-size: 12px;
+    }
   }
 
   &__time {
@@ -161,6 +187,11 @@
   outline: none;
   transition: border-color 0.15s, background 0.15s;
 
+  @media (max-width: 480px) {
+    width: 60px;
+    padding: 6px 8px;
+  }
+
   &:focus {
     border-color: #6366f1;
     background: rgba(99, 102, 241, 0.1);
@@ -191,6 +222,12 @@
   font-size: 11px;
   font-weight: 700;
   transition: background 0.13s, color 0.13s;
+
+  @media (max-width: 600px) {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
 
   &--edit {
     background: transparent;

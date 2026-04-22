@@ -1,6 +1,10 @@
 .print-run-form {
   padding: 20px;
   border-radius: 16px !important;
+
+  @media (max-width: 600px) {
+    padding: 16px 14px;
+  }
 }
 
 .print-run-form__head {
@@ -36,6 +40,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .print-run-form__footer {
@@ -44,6 +52,7 @@
   justify-content: flex-end;
   gap: 12px;
   padding-top: 4px;
+  flex-wrap: wrap;
 }
 
 .print-run-form__ok {
@@ -54,4 +63,9 @@
 
 .print-run-form__submit {
   min-width: 120px;
+
+  @media (max-width: 480px) {
+    min-height: 40px;
+    flex: 1;
+  }
 }

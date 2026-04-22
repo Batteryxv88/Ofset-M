@@ -3,6 +3,10 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 16px;
   padding: 20px 24px;
+
+  @media (max-width: 600px) {
+    padding: 16px 14px;
+  }
 }
 
 .settings-panel__header {
@@ -18,9 +22,14 @@
 }
 
 .settings-panel__rows {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  row-gap: 0;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .settings-panel__row {
@@ -31,13 +40,25 @@
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
-  &:last-child {
+  // Убираем нижнюю границу у последней строки в каждой колонке
+  &:nth-last-child(-n + 2) {
     border-bottom: none;
   }
 
+  @media (max-width: 860px) {
+    &:nth-last-child(-n + 2) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
   @media (max-width: 640px) {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
 }
 
@@ -107,6 +128,11 @@
   &::-webkit-inner-spin-button {
     -webkit-appearance: none;
   }
+
+  @media (max-width: 480px) {
+    width: 80px;
+    padding: 8px 10px;
+  }
 }
 
 .settings-panel__save-btn {
@@ -115,5 +141,11 @@
   &.settings-panel__save-btn--saved {
     color: #22c55e !important;
     border-color: #22c55e !important;
+  }
+
+  @media (max-width: 480px) {
+    min-width: 64px !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
   }
 }
