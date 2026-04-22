@@ -32,6 +32,20 @@ body {
   flex-direction: column;
 }
 
+// ── Убираем нативные стрелочки (spinner) у input[type=number] ──
+// Chrome / Safari / Edge / Opera
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+// Firefox
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 // ── iOS / Android fix: предотвращаем авто-зум при фокусе на input ──
 // iOS Safari делает zoom, если font-size < 16px. На мобильных ставим 16px.
 @media (max-width: 768px) {
