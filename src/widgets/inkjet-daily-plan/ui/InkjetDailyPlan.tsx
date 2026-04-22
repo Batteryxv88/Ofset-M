@@ -91,30 +91,6 @@ const InkjetDailyPlan = ({ refreshTrigger }: Props) => {
         </Alert>
       )}
 
-      {/* Крупный блок премии сегодня — доминирующий элемент */}
-      <div
-        className={`inkjet-plan__bonus ${todayBonus > 0 ? 'inkjet-plan__bonus--ok' : ''}`}
-      >
-        <div className="inkjet-plan__bonus-label">
-          <Typography variant="caption" color="text.secondary">
-            Премия сегодня — каждому в смене
-          </Typography>
-        </div>
-        <Typography variant="h3" className="inkjet-plan__bonus-amount">
-          {loading ? '—' : formatRub(todayBonus)}
-        </Typography>
-        {!loading && todayBonus === 0 && !reached && (
-          <Typography variant="caption" color="text.secondary" className="inkjet-plan__bonus-hint">
-            Порог ещё не взят — до премии {formatMin(leftToMin)}
-          </Typography>
-        )}
-        {!loading && todayBonus === 0 && reached && workersCount === 0 && (
-          <Typography variant="caption" color="text.secondary" className="inkjet-plan__bonus-hint">
-            Не указан состав смены — отметьте печатников в форме ввода
-          </Typography>
-        )}
-      </div>
-
       <div className="inkjet-plan__main">
         <RingProgress
           progress={progress}
@@ -123,12 +99,17 @@ const InkjetDailyPlan = ({ refreshTrigger }: Props) => {
           loading={loading}
         />
         <div className="inkjet-plan__readout">
-          <Typography variant="caption" color="text.secondary">
-            Общее время смены
-          </Typography>
-          <Typography variant="h6" className="inkjet-plan__big">
-            {loading ? '—' : formatMin(totalMinutes)}
-          </Typography>
+          <div className="inkjet-plan__bonus">
+            <Typography variant="caption" color="text.secondary" className="inkjet-plan__bonus-label">
+              Премия сегодня · каждому
+            </Typography>
+            <Typography
+              variant="h5"
+              className={`inkjet-plan__bonus-value ${todayBonus > 0 ? 'inkjet-plan__bonus-value--ok' : ''}`}
+            >
+              {loading ? '—' : formatRub(todayBonus)}
+            </Typography>
+          </div>
           <Typography
             variant="caption"
             className={`inkjet-plan__status ${reached ? 'inkjet-plan__status--ok' : ''}`}
@@ -136,8 +117,8 @@ const InkjetDailyPlan = ({ refreshTrigger }: Props) => {
             {loading
               ? '—'
               : reached
-                ? '✓ Порог взят'
-                : `До порога: ${formatMin(leftToMin)}`}
+                ? `✓ Порог взят · ${formatMin(totalMinutes)}`
+                : `До порога: ${formatMin(leftToMin)} · сейчас ${formatMin(totalMinutes)}`}
           </Typography>
         </div>
       </div>

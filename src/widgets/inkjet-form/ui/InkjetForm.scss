@@ -38,40 +38,82 @@
   &__shift {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
     padding: 12px 14px;
-    border-radius: 12px;
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.2s, border-color 0.2s;
+
+    &--editing {
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
   }
 
   &__shift-head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  &__shift-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
   }
 
   &__shift-title {
     display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 10px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
     font-weight: 600 !important;
-    letter-spacing: 0.02em;
   }
 
-  &__shift-clear {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    color: rgba(255, 255, 255, 0.75);
-    padding: 4px 10px;
+  &__shift-summary {
+    color: rgba(255, 255, 255, 0.85) !important;
+    line-height: 1.35 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px !important;
+  }
+
+  &__shift-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  &__shift-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 5px 12px;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s;
 
     &:hover {
-      border-color: rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
       color: #fff;
+    }
+
+    &--ghost {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.55);
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.85);
+      }
     }
   }
 
@@ -133,17 +175,6 @@
     .ij-form__shift-chip--on & {
       background: #6366f1;
       color: #fff;
-    }
-  }
-
-  &__shift-count {
-    display: block;
-    font-size: 12px !important;
-    letter-spacing: 0.02em;
-
-    b {
-      color: #fff;
-      font-weight: 600;
     }
   }
 

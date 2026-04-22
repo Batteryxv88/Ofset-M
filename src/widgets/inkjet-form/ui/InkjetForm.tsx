@@ -58,6 +58,7 @@ const InkjetForm = ({ onSaved }: Props) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [shiftEditing, setShiftEditing] = useState(false);
 
   const { workerIds: shiftIds, toggle: toggleShiftWorker, clear: clearShift } =
     useInkjetShift();
@@ -155,58 +156,68 @@ const InkjetForm = ({ onSaved }: Props) => {
       <Divider className="ij-form__divider" />
 
       {/* ── Блок «Кто сегодня в смене» ──────────────────── */}
-      <div className="ij-form__shift">
+      <div className={`ij-form__shift ${shiftEditing ? 'ij-form__shift--editing' : ''}`}>
         <div className="ij-form__shift-head">
-          <div>
+          <div className="ij-form__shift-info">
             <Typography variant="caption" className="ij-form__shift-title">
-              Кто сегодня в смене
+              В смене сегодня
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Отметьте всех, кто работает сегодня — бонус разделится на этот состав
+            <Typography variant="body2" className="ij-form__shift-summary">
+              {selectedWorkers.length === 0
+                ? 'Никто не отмечен'
+                : selectedWorkers.map((w) => w.label).join(', ')}
             </Typography>
           </div>
-          {selectedWorkers.length > 0 && (
+          <div className="ij-form__shift-actions">
+            {shiftEditing && selectedWorkers.length > 0 && (
+              <button
+                type="button"
+                className="ij-form__shift-btn ij-form__shift-btn--ghost"
+                onClick={clearShift}
+                title="Сбросить состав смены"
+              >
+                Сбросить
+              </button>
+            )}
             <button
               type="button"
-              className="ij-form__shift-clear"
-              onClick={clearShift}
-              title="Сбросить состав смены"
+              className="ij-form__shift-btn"
+              onClick={() => setShiftEditing((v) => !v)}
             >
-              Сбросить
+              {shiftEditing ? 'Готово' : 'Изменить'}
             </button>
-          )}
+          </div>
         </div>
 
-        {workers.length === 0 ? (
-          <Typography variant="caption" color="text.secondary" className="ij-form__shift-empty">
-            Список печатников пуст. Попросите администратора добавить сотрудников на странице «Админ → Струйная → Списки».
-          </Typography>
-        ) : (
-          <div className="ij-form__shift-chips">
-            {workers.map((w) => {
-              const on = shiftIds.includes(w.id);
-              return (
-                <button
-                  type="button"
-                  key={w.id}
-                  className={`ij-form__shift-chip ${on ? 'ij-form__shift-chip--on' : ''}`}
-                  onClick={() => toggleShiftWorker(w.id)}
-                  aria-pressed={on}
-                >
-                  <span className="ij-form__shift-chip-dot" aria-hidden>
-                    {on ? '✓' : '+'}
-                  </span>
-                  {w.label}
-                </button>
-              );
-            })}
-          </div>
+        {shiftEditing && (
+          <>
+            {workers.length === 0 ? (
+              <Typography variant="caption" color="text.secondary" className="ij-form__shift-empty">
+                Список печатников пуст. Попросите администратора добавить сотрудников на странице «Админ → Струйная → Списки».
+              </Typography>
+            ) : (
+              <div className="ij-form__shift-chips">
+                {workers.map((w) => {
+                  const on = shiftIds.includes(w.id);
+                  return (
+                    <button
+                      type="button"
+                      key={w.id}
+                      className={`ij-form__shift-chip ${on ? 'ij-form__shift-chip--on' : ''}`}
+                      onClick={() => toggleShiftWorker(w.id)}
+                      aria-pressed={on}
+                    >
+                      <span className="ij-form__shift-chip-dot" aria-hidden>
+                        {on ? '✓' : '+'}
+                      </span>
+                      {w.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
-
-        <Typography variant="caption" color="text.secondary" className="ij-form__shift-count">
-          В смене: <b>{selectedWorkers.length}</b>
-          {selectedWorkers.length > 0 && ` · ${selectedWorkers.map((w) => w.label).join(', ')}`}
-        </Typography>
       </div>
 
       <Divider className="ij-form__divider" />
