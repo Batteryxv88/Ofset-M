@@ -68,7 +68,7 @@ function formatDayLabel(dateKey: string): string {
  *        R = Σ (setup_minutes + print_minutes + post_print_minutes) по всем работам дня
  *        workers = количество уникальных user_id за день
  *   3) Если R > inkjet_min_total_minutes → премия за день считается, иначе 0.
- *   4) dayBonus = max(0, (R/60 − workers × inkjet_norm_hours_per_worker) × inkjet_rate_per_hour)
+ *   4) dayBonus = max(0, ((R / 60) − (workers × inkjet_norm_hours_per_worker)) × inkjet_rate_per_hour)
  *   5) dayBonus начисляется КАЖДОМУ работнику смены в полном объёме.
  *   6) Итоговая премия работника = Σ dayBonus за все смены, где он участвовал.
  */
@@ -131,9 +131,10 @@ export function calcInkjetBonuses(
     const workersCount = bucket.workers.size;
     const R = bucket.totalMinutes;
 
+    // Формула: ((R/60) − (workers × norm)) × rate, не даёт уйти в минус
     const perWorkerBonus =
       R > minTotal
-        ? Math.max(0, (R / 60 - workersCount * norm) * rate)
+        ? Math.max(0, ((R / 60) - (workersCount * norm)) * rate)
         : 0;
 
     const dayDetail: InkjetDayDetail = {

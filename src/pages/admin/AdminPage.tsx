@@ -286,7 +286,7 @@ const InkjetBonusTable = () => {
         <Typography variant="caption" color="text.secondary">
           R = Σ (приладка + печать + постпечать) всех печатников за день.
           Если R &gt; {formatNum(settings.inkjet_min_total_minutes)} мин →
-          премия каждому работнику = (R/60 − кол-во работников × {settings.inkjet_norm_hours_per_worker} ч)
+          премия каждому работнику = ((R / 60) − (кол-во работников × {settings.inkjet_norm_hours_per_worker} ч))
           × {settings.inkjet_rate_per_hour} ₽
         </Typography>
       </div>

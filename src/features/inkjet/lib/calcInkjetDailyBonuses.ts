@@ -38,7 +38,7 @@ function formatLabel(dateKey: string): string {
  *   R = totalMinutes
  *   workers = workersCount
  *   perWorkerBonus = R > min_total_minutes
- *                      ? max(0, (R/60 − workers × norm) × rate)
+ *                      ? max(0, ((R / 60) − (workers × norm)) × rate)
  *                      : 0
  *   dayBonus(user) = involvesMe ? perWorkerBonus : 0
  *
@@ -63,7 +63,7 @@ export function calcInkjetDailyBonuses(
 
     const perWorker =
       s.totalMinutes > minTotal
-        ? Math.max(0, (s.totalMinutes / 60 - s.workersCount * norm) * rate)
+        ? Math.max(0, ((s.totalMinutes / 60) - (s.workersCount * norm)) * rate)
         : 0;
 
     breakdown.push({
@@ -99,5 +99,5 @@ export function calcInkjetTodayBonus(
   const rate = settings.inkjet_rate_per_hour;
 
   if (totalMinutes <= minTotal) return 0;
-  return Math.max(0, (totalMinutes / 60 - workersCount * norm) * rate);
+  return Math.max(0, ((totalMinutes / 60) - (workersCount * norm)) * rate);
 }
