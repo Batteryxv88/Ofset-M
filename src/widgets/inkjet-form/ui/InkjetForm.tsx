@@ -6,6 +6,7 @@ import {
   createInkjetJob,
   getInkjetOptions,
   getInkjetWorkers,
+  updateTodayJobsWorkers,
   useInkjetShift,
 } from '../../../features/inkjet';
 import type { InkjetOption, InkjetWorker, PrintType } from '../../../features/inkjet';
@@ -47,9 +48,9 @@ const INITIAL: FormState = {
   notes: '', status: '',
 };
 
-type Props = { onSaved?: () => void };
+type Props = { onSaved?: () => void; onShiftChange?: () => void };
 
-const InkjetForm = ({ onSaved }: Props) => {
+const InkjetForm = ({ onSaved, onShiftChange }: Props) => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [form, setForm] = useState<FormState>(INITIAL);
@@ -59,9 +60,25 @@ const InkjetForm = ({ onSaved }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [shiftEditing, setShiftEditing] = useState(false);
+  const [shiftSaving, setShiftSaving] = useState(false);
 
   const { workerIds: shiftIds, toggle: toggleShiftWorker, clear: clearShift } =
     useInkjetShift();
+
+  /** Закрывает режим редактирования смены, обновляет worker_ids в сегодняшних заданиях и тригерит пересчёт бонуса */
+  const handleShiftDone = async () => {
+    setShiftEditing(false);
+    // Обновляем БД в фоне — не блокируем UI
+    setShiftSaving(true);
+    try {
+      await updateTodayJobsWorkers(shiftIds);
+      onShiftChange?.();
+    } catch {
+      // Не критично — пользователь может нажать «Обновить» в дневном плане
+    } finally {
+      setShiftSaving(false);
+    }
+  };
 
   useEffect(() => {
     getInkjetOptions().then(setOptions).catch(() => {});
@@ -152,9 +169,12 @@ const InkjetForm = ({ onSaved }: Props) => {
             <button
               type="button"
               className="ij-form__shift-btn"
-              onClick={() => setShiftEditing((v) => !v)}
+              onClick={() => shiftEditing ? handleShiftDone() : setShiftEditing(true)}
+              disabled={shiftSaving}
             >
-              {shiftEditing ? 'Готово' : 'Изменить'}
+              {shiftSaving
+                ? <CircularProgress size={11} color="inherit" />
+                : shiftEditing ? 'Готово' : 'Изменить'}
             </button>
           </div>
         </div>

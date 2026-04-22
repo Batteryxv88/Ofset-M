@@ -26,7 +26,7 @@ const InkjetDashboardPage = () => {
 
           {/* Левая колонка: форма ввода */}
           <div className="inkjet-page__col inkjet-page__col--left">
-            <InkjetForm onSaved={handleSaved} />
+            <InkjetForm onSaved={handleSaved} onShiftChange={handleSaved} />
           </div>
 
           {/* Правая колонка: дневной план + премия за период */}
