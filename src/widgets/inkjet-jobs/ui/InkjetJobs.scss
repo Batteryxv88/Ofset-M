@@ -437,6 +437,16 @@
   }
 }
 
+// Иконка ошибки при смене статуса
+.ij-status-err {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  color: rgba(248, 113, 113, 0.85);
+  cursor: help;
+  flex-shrink: 0;
+}
+
 // Ячейка «статус + иконка заметок» в таблице
 .ij-jobs__status-cell {
   display: inline-flex;

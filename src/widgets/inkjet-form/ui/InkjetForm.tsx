@@ -58,6 +58,7 @@ const InkjetForm = ({ onSaved, onShiftChange }: Props) => {
   const [workers, setWorkers] = useState<InkjetWorker[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [shiftEditing, setShiftEditing] = useState(false);
   const [shiftSaving, setShiftSaving] = useState(false);
@@ -81,8 +82,11 @@ const InkjetForm = ({ onSaved, onShiftChange }: Props) => {
   };
 
   useEffect(() => {
-    getInkjetOptions().then(setOptions).catch(() => {});
-    getInkjetWorkers().then(setWorkers).catch(() => {});
+    Promise.all([getInkjetOptions(), getInkjetWorkers()])
+      .then(([opts, wrks]) => { setOptions(opts); setWorkers(wrks); })
+      .catch((e: unknown) => {
+        setLoadError(e instanceof Error ? e.message : 'Ошибка загрузки справочников');
+      });
   }, []);
 
   const selectedWorkers = useMemo(
@@ -412,6 +416,11 @@ const InkjetForm = ({ onSaved, onShiftChange }: Props) => {
 
       {/* ── Подвал ───────────────────────────────────────────── */}
       <div className="ij-form__footer">
+        {loadError && (
+          <Typography variant="caption" color="error" className="ij-form__load-error">
+            ⚠ {loadError} — выпадающие списки недоступны
+          </Typography>
+        )}
         {error && (
           <Typography variant="caption" color="error">{error}</Typography>
         )}

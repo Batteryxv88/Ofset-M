@@ -81,6 +81,12 @@ const authSlice = createSlice({
         state.user.email = action.payload.email ?? state.user.email;
         state.user.role = action.payload.role ?? state.user.role;
       })
+      .addCase(loadProfile.rejected, (state, action) => {
+        // Профиль не загрузился — оставляем пользователя, но пишем ошибку
+        state.error = (action.payload as string | undefined)
+          ?? action.error.message
+          ?? 'Не удалось загрузить профиль';
+      })
       .addCase(signOut.fulfilled, (state) => {
         state.user = null;
         state.status = 'idle';

@@ -23,14 +23,16 @@ const CategoryList = ({
   const [newVal, setNewVal]   = useState('');
   const [adding, setAdding]   = useState(false);
   const [error, setError]     = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       setItems(await getInkjetOptions(category));
-    } catch {
-      // silent
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Ошибка загрузки');
     } finally {
       setLoading(false);
     }
@@ -66,11 +68,12 @@ const CategoryList = ({
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
+    setDeleteError(null);
     try {
       await deleteInkjetOption(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
-    } catch {
-      // silent
+    } catch (e: unknown) {
+      setDeleteError(e instanceof Error ? e.message : 'Не удалось удалить');
     } finally {
       setDeletingId(null);
     }
@@ -128,6 +131,11 @@ const CategoryList = ({
       {error && (
         <Typography variant="caption" color="error" className="ij-opt-cat__error">
           {error}
+        </Typography>
+      )}
+      {deleteError && (
+        <Typography variant="caption" color="error" className="ij-opt-cat__error">
+          ⚠ {deleteError}
         </Typography>
       )}
     </div>

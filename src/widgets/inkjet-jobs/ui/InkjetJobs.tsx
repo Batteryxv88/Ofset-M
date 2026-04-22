@@ -35,6 +35,7 @@ const QuickStatus = ({
 }) => {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const color = job.status
     ? STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)'
@@ -50,11 +51,12 @@ const QuickStatus = ({
     closeMenu();
     if (label === job.status) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await updateInkjetJob(job.id, { status: label });
       onChanged();
-    } catch {
-      // silent — пользователь увидит старое значение
+    } catch (e: unknown) {
+      setSaveError(e instanceof Error ? e.message : 'Не удалось сменить статус');
     } finally {
       setSaving(false);
     }
@@ -62,6 +64,11 @@ const QuickStatus = ({
 
   return (
     <>
+      {saveError && (
+        <Tooltip title={saveError} placement="top" arrow>
+          <span className="ij-status-err" aria-label={saveError}>⚠</span>
+        </Tooltip>
+      )}
       <button
         type="button"
         className="ij-status ij-status--button"

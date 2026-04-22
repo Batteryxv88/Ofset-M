@@ -7,11 +7,13 @@ import { DEFAULT_SETTINGS } from './types';
 type SettingsState = {
   values: AppSettings;
   loaded: boolean;
+  error: string | null;
 };
 
 const initialState: SettingsState = {
   values: DEFAULT_SETTINGS,
   loaded: false,
+  error: null,
 };
 
 export const fetchSettings = createAsyncThunk('settings/fetch', async () => {
@@ -39,10 +41,19 @@ const settingsSlice = createSlice({
           }
         }
         state.loaded = true;
+        state.error  = null;
+      })
+      .addCase(fetchSettings.rejected, (state, action) => {
+        // Оставляем DEFAULT_SETTINGS, чтобы приложение продолжило работу
+        state.loaded = true;
+        state.error  = (action.error.message ?? 'Не удалось загрузить настройки');
       })
       .addCase(saveSetting.fulfilled, (state, action) => {
         const { key, value } = action.payload;
         (state.values as Record<string, number>)[key] = value;
+      })
+      .addCase(saveSetting.rejected, (state, action) => {
+        state.error = action.error.message ?? 'Не удалось сохранить настройку';
       });
   },
 });

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,6 +11,51 @@ import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import InkjetDashboardPage from './pages/inkjet-dashboard/InkjetDashboardPage';
 import AdminPage from './pages/admin/AdminPage';
+import './App.scss';
+
+// ── Экран «Supabase не настроен» ────────────────────────────────
+const NoSupabaseScreen = () => (
+  <div className="app-fatal">
+    <div className="app-fatal__card">
+      <div className="app-fatal__icon" aria-hidden>🔌</div>
+      <h2 className="app-fatal__title">Сервис недоступен</h2>
+      <p className="app-fatal__desc">
+        Не удалось подключиться к базе данных.<br />
+        Отсутствуют переменные окружения{' '}
+        <code>VITE_SUPABASE_URL</code> и{' '}
+        <code>VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY</code>.
+      </p>
+      <p className="app-fatal__hint">
+        Если вы видите это на GitHub Pages — убедитесь, что секреты добавлены в настройках репозитория.
+      </p>
+    </div>
+  </div>
+);
+
+// ── Оффлайн-баннер ──────────────────────────────────────────────
+const OfflineBanner = () => {
+  const [offline, setOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const onOnline  = () => setOffline(false);
+    const onOffline = () => setOffline(true);
+    window.addEventListener('online',  onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online',  onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
+
+  if (!offline) return null;
+
+  return (
+    <div className="app-offline" role="alert" aria-live="polite">
+      <span className="app-offline__dot" aria-hidden />
+      Нет подключения к интернету — данные могут быть устаревшими
+    </div>
+  );
+};
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -88,9 +133,12 @@ function App() {
     };
   }, [dispatch]);
 
+  if (!supabase) return <NoSupabaseScreen />;
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <OfflineBanner />
       <Routes>
         {/* Лазерная печать (laser_printer + admin) */}
         <Route
