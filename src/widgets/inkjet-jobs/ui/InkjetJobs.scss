@@ -293,7 +293,9 @@
 
 // ── Бейдж статуса ─────────────────────────────────────────────
 .ij-status {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -301,6 +303,151 @@
   background: rgba(255,255,255,0.06);
   border: 1px solid var(--status-color, rgba(255,255,255,0.15));
   color: var(--status-color, rgba(255,255,255,0.6));
+  line-height: 1.4;
+
+  // Версия-кнопка для быстрой смены статуса
+  &--button {
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.13s, border-color 0.13s, transform 0.12s;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--status-color, rgba(255,255,255,0.3));
+    }
+    &:active:not(:disabled) { transform: scale(0.97); }
+    &:disabled { opacity: 0.5; cursor: wait; }
+  }
+
+  &__caret {
+    font-size: 9px;
+    opacity: 0.55;
+    margin-left: 1px;
+    line-height: 1;
+  }
+
+  @media (max-width: 768px) {
+    padding: 4px 10px;
+    font-size: 12px;
+    &__caret { font-size: 10px; }
+  }
+}
+
+// Выпадающее меню со статусами
+.ij-status-menu {
+  background: #1a1d2e !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  margin-top: 4px;
+  min-width: 160px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4) !important;
+
+  &__item {
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    gap: 8px;
+    display: flex !important;
+    align-items: center;
+  }
+
+  &__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  &__tick {
+    margin-left: auto;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+  }
+}
+
+// Кнопка-иконка «есть комментарий/примечание»
+.ij-notes-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: none;
+  cursor: help;
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+  transition: background 0.13s, color 0.13s;
+  padding: 0;
+  flex-shrink: 0;
+
+  &:hover { background: rgba(99, 102, 241, 0.22); }
+  svg { display: block; }
+
+  @media (max-width: 768px) {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+// Ячейка «статус + иконка заметок» в таблице
+.ij-jobs__status-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// Группа «статус + иконка» в мобильной карточке
+.ij-card__status-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// Содержимое всплывающей подсказки
+.ij-notes-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 0;
+  max-width: 280px;
+
+  &__block + &__block {
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  &__label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(165, 180, 252, 0.85);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  &__text {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+}
+
+.ij-notes-tip-popper .MuiTooltip-tooltip {
+  background: #1a1d2e !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 10px 12px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+.ij-notes-tip-popper .MuiTooltip-arrow {
+  color: #1a1d2e !important;
+  &::before { border: 1px solid rgba(255, 255, 255, 0.08); }
 }
 
 // ── Диалог редактирования ─────────────────────────────────────

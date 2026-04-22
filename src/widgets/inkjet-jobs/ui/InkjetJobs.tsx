@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type MouseEvent } from 'react';
 import {
   Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogTitle, Divider, Paper, Typography, useMediaQuery,
+  DialogTitle, Divider, Menu, MenuItem, Paper, Tooltip, Typography, useMediaQuery,
 } from '@mui/material';
 import { getMyInkjetJobs, getInkjetOptions, updateInkjetJob } from '../../../features/inkjet';
 import type { InkjetJob, InkjetOption } from '../../../features/inkjet';
@@ -23,6 +23,145 @@ const STATUS_COLORS: Record<string, string> = {
   'Выполнен': 'var(--ij-status-done)',
   'На паузе': 'var(--ij-status-pause)',
   'Отменён':  'var(--ij-status-cancel)',
+};
+
+// ── Быстрая смена статуса (chip-кнопка с выпадающим меню) ─────
+const QuickStatus = ({
+  job, statuses, onChanged,
+}: {
+  job: InkjetJob;
+  statuses: InkjetOption[];
+  onChanged: () => void;
+}) => {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const color = job.status
+    ? STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)'
+    : 'rgba(255,255,255,0.3)';
+
+  const openMenu = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setAnchor(e.currentTarget);
+  };
+  const closeMenu = () => setAnchor(null);
+
+  const apply = async (label: string) => {
+    closeMenu();
+    if (label === job.status) return;
+    setSaving(true);
+    try {
+      await updateInkjetJob(job.id, { status: label });
+      onChanged();
+    } catch {
+      // silent — пользователь увидит старое значение
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="ij-status ij-status--button"
+        style={{ '--status-color': color } as React.CSSProperties}
+        onClick={openMenu}
+        disabled={saving}
+        title="Сменить статус"
+      >
+        {saving ? (
+          <CircularProgress size={10} color="inherit" />
+        ) : (
+          <>
+            <span>{job.status ?? 'Без статуса'}</span>
+            <span className="ij-status__caret" aria-hidden>▾</span>
+          </>
+        )}
+      </button>
+
+      <Menu
+        anchorEl={anchor}
+        open={Boolean(anchor)}
+        onClose={closeMenu}
+        PaperProps={{ className: 'ij-status-menu' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top',    horizontal: 'left' }}
+      >
+        {statuses.length === 0 && (
+          <MenuItem disabled>Нет статусов в справочнике</MenuItem>
+        )}
+        {statuses.map((s) => {
+          const active = s.label === job.status;
+          return (
+            <MenuItem
+              key={s.id}
+              selected={active}
+              onClick={() => apply(s.label)}
+              className="ij-status-menu__item"
+            >
+              <span
+                className="ij-status-menu__dot"
+                style={{ background: STATUS_COLORS[s.label] ?? 'rgba(255,255,255,0.3)' }}
+              />
+              {s.label}
+              {active && <span className="ij-status-menu__tick">✓</span>}
+            </MenuItem>
+          );
+        })}
+      </Menu>
+    </>
+  );
+};
+
+// ── Иконка с тултипом (постпечать + примечание) ─────────────
+const NotesIcon = ({ job }: { job: InkjetJob }) => {
+  const hasPost  = Boolean(job.post_print && job.post_print.trim());
+  const hasNotes = Boolean(job.notes && job.notes.trim());
+  if (!hasPost && !hasNotes) return null;
+
+  const tooltip = (
+    <div className="ij-notes-tip">
+      {hasPost && (
+        <div className="ij-notes-tip__block">
+          <div className="ij-notes-tip__label">Постпечать</div>
+          <div className="ij-notes-tip__text">{job.post_print}</div>
+        </div>
+      )}
+      {hasNotes && (
+        <div className="ij-notes-tip__block">
+          <div className="ij-notes-tip__label">Примечание</div>
+          <div className="ij-notes-tip__text">{job.notes}</div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <Tooltip
+      title={tooltip}
+      arrow
+      enterTouchDelay={0}
+      leaveTouchDelay={4000}
+      placement="top"
+      PopperProps={{ className: 'ij-notes-tip-popper' }}
+    >
+      <button
+        type="button"
+        className="ij-notes-btn"
+        aria-label="Показать постпечать и примечание"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path
+            d="M2 3h10v6H7l-2.5 2.5V9H2V3z"
+            stroke="currentColor" strokeWidth="1.3"
+            strokeLinejoin="round" fill="currentColor" fillOpacity="0.08"
+          />
+        </svg>
+      </button>
+    </Tooltip>
+  );
 };
 
 // ── Edit Dialog ────────────────────────────────────────────────
@@ -247,6 +386,8 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
   const [error, setError]     = useState<string | null>(null);
   const [editing, setEditing] = useState<InkjetJob | null>(null);
 
+  const statuses = options.filter((o) => o.category === 'status');
+
   const load = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
@@ -280,7 +421,7 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
             Мои задания
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Нажмите ✎ чтобы отредактировать запись
+            Статус меняется по клику · ✎ — полное редактирование
           </Typography>
         </div>
         {loading && <CircularProgress size={16} />}
@@ -336,14 +477,10 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                     <td className="num">{job.quantity ?? '—'}</td>
                     <td>{job.manager ?? '—'}</td>
                     <td>
-                      {job.status ? (
-                        <span
-                          className="ij-status"
-                          style={{ '--status-color': STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)' } as React.CSSProperties}
-                        >
-                          {job.status}
-                        </span>
-                      ) : '—'}
+                      <div className="ij-jobs__status-cell">
+                        <QuickStatus job={job} statuses={statuses} onChanged={load} />
+                        <NotesIcon job={job} />
+                      </div>
                     </td>
                     <td>
                       {job.due_date
@@ -400,16 +537,12 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                   </button>
                 </div>
 
-                {/* Статус + дата сдачи */}
+                {/* Статус + иконка комментариев + дата сдачи */}
                 <div className="ij-card__status-row">
-                  {job.status ? (
-                    <span
-                      className="ij-status"
-                      style={{ '--status-color': STATUS_COLORS[job.status] ?? 'rgba(255,255,255,0.3)' } as React.CSSProperties}
-                    >
-                      {job.status}
-                    </span>
-                  ) : <span className="ij-card__muted">без статуса</span>}
+                  <div className="ij-card__status-group">
+                    <QuickStatus job={job} statuses={statuses} onChanged={load} />
+                    <NotesIcon job={job} />
+                  </div>
                   {job.due_date && (
                     <span className="ij-card__due">
                       до {new Date(job.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
@@ -473,13 +606,6 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                     <span className="ij-card__value">{formatDur(job.post_print_minutes)}</span>
                   </div>
                 </div>
-
-                {job.post_print && (
-                  <div className="ij-card__note">
-                    <span className="ij-card__label">Постпечать</span>
-                    <span className="ij-card__value ij-card__value--wrap">{job.post_print}</span>
-                  </div>
-                )}
               </div>
             ))}
           </div>
