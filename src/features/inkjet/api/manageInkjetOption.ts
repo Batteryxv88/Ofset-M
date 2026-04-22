@@ -7,13 +7,23 @@ export async function addInkjetOption(
 ): Promise<InkjetOption> {
   if (!supabase) throw new Error('Supabase не сконфигурирован');
 
+  const trimmed = label.trim();
+  if (!trimmed) throw new Error('Пустое значение');
+
   const { data, error } = await supabase
     .from('inkjet_options')
-    .insert({ category, label, sort_order: 0 })
+    .insert({ category, label: trimmed, sort_order: 0 })
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    // 23505 = postgres unique_violation — дубликат в справочнике
+    const pgCode = (error as { code?: string }).code;
+    if (pgCode === '23505') {
+      throw new Error(`«${trimmed}» уже есть в справочнике`);
+    }
+    throw new Error(error.message);
+  }
   return data as InkjetOption;
 }
 

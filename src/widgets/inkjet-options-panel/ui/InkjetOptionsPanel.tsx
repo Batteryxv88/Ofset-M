@@ -39,11 +39,22 @@ const CategoryList = ({
   useEffect(() => { void load(); }, [load]);
 
   const handleAdd = async () => {
-    if (!newVal.trim()) return;
+    const trimmed = newVal.trim();
+    if (!trimmed) return;
+
+    // Локальная проверка на дубликат (case-insensitive)
+    const exists = items.some(
+      (i) => i.label.trim().toLocaleLowerCase('ru-RU') === trimmed.toLocaleLowerCase('ru-RU'),
+    );
+    if (exists) {
+      setError(`«${trimmed}» уже есть в справочнике`);
+      return;
+    }
+
     setAdding(true);
     setError(null);
     try {
-      const added = await addInkjetOption(category, newVal.trim());
+      const added = await addInkjetOption(category, trimmed);
       setItems((prev) => [...prev, added]);
       setNewVal('');
     } catch (e: unknown) {
@@ -101,7 +112,7 @@ const CategoryList = ({
           className="ij-opt-cat__input"
           placeholder="Новое значение…"
           value={newVal}
-          onChange={(e) => setNewVal(e.target.value)}
+          onChange={(e) => { setNewVal(e.target.value); if (error) setError(null); }}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
           disabled={adding}
         />
