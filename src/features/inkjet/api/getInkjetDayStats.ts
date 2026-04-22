@@ -3,13 +3,13 @@ import { supabase } from '../../../shared/api/supabaseClient';
 export type InkjetDayStats = {
   totalMinutes: number;
   workersCount: number;
-  ownMinutes: number;
-  involvesMe: boolean;
+  /** ID печатников, которые были в смене сегодня (из inkjet_options category='worker') */
+  workerIds: string[];
 };
 
 /**
- * Возвращает агрегаты струйной печати за один день.
- * Клиент сам задаёт границы (обычно — локальные 00:00 … 23:59 сегодня).
+ * Агрегаты струйной печати за один день (локальный TZ).
+ * workers_count считается по ⋃ worker_ids всех записей дня.
  */
 export async function getInkjetDayStats(day: Date): Promise<InkjetDayStats> {
   if (!supabase) throw new Error('Supabase не сконфигурирован');
@@ -29,14 +29,12 @@ export async function getInkjetDayStats(day: Date): Promise<InkjetDayStats> {
   const row = (data?.[0] ?? {}) as {
     total_minutes?: number;
     workers_count?: number;
-    own_minutes?: number;
-    involves_me?: boolean;
+    worker_ids?: string[] | null;
   };
 
   return {
     totalMinutes: Number(row.total_minutes ?? 0),
     workersCount: Number(row.workers_count ?? 0),
-    ownMinutes: Number(row.own_minutes ?? 0),
-    involvesMe: Boolean(row.involves_me ?? false),
+    workerIds: (row.worker_ids ?? []) as string[],
   };
 }

@@ -60,12 +60,10 @@ const InkjetDailyPlan = ({ refreshTrigger }: Props) => {
 
   const totalMinutes = stats?.totalMinutes ?? 0;
   const workersCount = stats?.workersCount ?? 0;
-  const ownMinutes = stats?.ownMinutes ?? 0;
   const progress = Math.max(0, Math.min(1, totalMinutes / (minTotal || 1)));
   const leftToMin = Math.max(0, minTotal - totalMinutes);
   const reached = totalMinutes > minTotal;
 
-  // Премия за сегодня (каждому работнику смены)
   const todayBonus = stats
     ? calcInkjetTodayBonus(totalMinutes, workersCount, settings)
     : 0;
@@ -92,6 +90,30 @@ const InkjetDailyPlan = ({ refreshTrigger }: Props) => {
           {error}
         </Alert>
       )}
+
+      {/* Крупный блок премии сегодня — доминирующий элемент */}
+      <div
+        className={`inkjet-plan__bonus ${todayBonus > 0 ? 'inkjet-plan__bonus--ok' : ''}`}
+      >
+        <div className="inkjet-plan__bonus-label">
+          <Typography variant="caption" color="text.secondary">
+            Премия сегодня — каждому в смене
+          </Typography>
+        </div>
+        <Typography variant="h3" className="inkjet-plan__bonus-amount">
+          {loading ? '—' : formatRub(todayBonus)}
+        </Typography>
+        {!loading && todayBonus === 0 && !reached && (
+          <Typography variant="caption" color="text.secondary" className="inkjet-plan__bonus-hint">
+            Порог ещё не взят — до премии {formatMin(leftToMin)}
+          </Typography>
+        )}
+        {!loading && todayBonus === 0 && reached && workersCount === 0 && (
+          <Typography variant="caption" color="text.secondary" className="inkjet-plan__bonus-hint">
+            Не указан состав смены — отметьте печатников в форме ввода
+          </Typography>
+        )}
+      </div>
 
       <div className="inkjet-plan__main">
         <RingProgress
@@ -132,22 +154,10 @@ const InkjetDailyPlan = ({ refreshTrigger }: Props) => {
 
         <div className="inkjet-plan__metric">
           <Typography variant="caption" color="text.secondary">
-            Моё время
+            Ставка
           </Typography>
           <Typography variant="body2" className="inkjet-plan__metric-value">
-            {loading ? '—' : formatMin(ownMinutes)}
-          </Typography>
-        </div>
-
-        <div className="inkjet-plan__metric inkjet-plan__metric--bonus">
-          <Typography variant="caption" color="text.secondary">
-            Премия сегодня (каждому)
-          </Typography>
-          <Typography
-            variant="body2"
-            className={`inkjet-plan__metric-value ${todayBonus > 0 ? 'inkjet-plan__metric-value--ok' : ''}`}
-          >
-            {loading ? '—' : formatRub(todayBonus)}
+            {settings.inkjet_rate_per_hour} ₽ / ч
           </Typography>
         </div>
       </div>

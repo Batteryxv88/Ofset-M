@@ -14,9 +14,15 @@ import {
 import type { RootState } from '../../../app/store';
 import {
   getInkjetPeriodDayStats,
+  getInkjetWorkers,
   calcInkjetDailyBonuses,
+  calcInkjetWorkerBonuses,
 } from '../../../features/inkjet';
-import type { InkjetMyBonusSummary } from '../../../features/inkjet';
+import type {
+  InkjetDailyBonus,
+  InkjetWorker,
+  InkjetWorkerBonus,
+} from '../../../features/inkjet';
 import { getBillingPeriod, formatRub } from '../../../shared/lib';
 import './InkjetBonusSummary.scss';
 
@@ -40,12 +46,7 @@ const ChartTooltip = ({
 }: {
   active?: boolean;
   payload?: {
-    payload: {
-      dayBonus: number;
-      totalMinutes: number;
-      workersCount: number;
-      ownMinutes: number;
-    };
+    payload: InkjetDailyBonus;
   }[];
   label?: string;
 }) => {
@@ -60,11 +61,8 @@ const ChartTooltip = ({
       <div className="ij-bonus-chart__tooltip-row">
         Работников: {d.workersCount}
       </div>
-      <div className="ij-bonus-chart__tooltip-row">
-        Моё: {formatMin(d.ownMinutes)}
-      </div>
       <div className="ij-bonus-chart__tooltip-total">
-        Премия: {formatRub(d.dayBonus)}
+        Каждому: {formatRub(d.dayBonus)}
       </div>
     </div>
   );
@@ -78,7 +76,9 @@ const InkjetBonusSummary = ({ refreshTrigger }: Props) => {
     [settings.calculation_day],
   );
 
-  const [summary, setSummary] = useState<InkjetMyBonusSummary | null>(null);
+  const [daily, setDaily] = useState<InkjetDailyBonus[]>([]);
+  const [workersReport, setWorkersReport] = useState<InkjetWorkerBonus[]>([]);
+  const [allWorkers, setAllWorkers] = useState<InkjetWorker[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,11 +89,13 @@ const InkjetBonusSummary = ({ refreshTrigger }: Props) => {
     setLoading(true);
     setError(null);
     try {
-      const stats = await getInkjetPeriodDayStats(
-        new Date(fromMs),
-        new Date(toMs),
-      );
-      setSummary(calcInkjetDailyBonuses(stats, settings));
+      const [stats, workers] = await Promise.all([
+        getInkjetPeriodDayStats(new Date(fromMs), new Date(toMs)),
+        getInkjetWorkers(),
+      ]);
+      setAllWorkers(workers);
+      setDaily(calcInkjetDailyBonuses(stats, settings));
+      setWorkersReport(calcInkjetWorkerBonuses(stats, workers, settings));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка загрузки');
     } finally {
@@ -110,12 +112,16 @@ const InkjetBonusSummary = ({ refreshTrigger }: Props) => {
   }, [refreshTrigger]);
 
   useEffect(() => {
-    if (summary) load();
+    // Пересчитываем при изменении настроек (не перезагружая данные)
+    if (daily.length > 0 || workersReport.length > 0) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
-  const chartData = summary?.dailyBreakdown ?? [];
-  const hasData = chartData.length > 0 && (summary?.totalBonus ?? 0) > 0;
+  const hasChart = daily.length > 0 && daily.some((d) => d.dayBonus > 0);
+  const grandTotal = workersReport.reduce(
+    (sum, w) => sum + w.totalBonus,
+    0,
+  );
 
   return (
     <Paper elevation={0} className="ij-bonus-summary">
@@ -137,37 +143,63 @@ const InkjetBonusSummary = ({ refreshTrigger }: Props) => {
         </Typography>
       )}
 
+      {/* Суммарный фонд */}
       <div className="ij-bonus-summary__total">
-        <Typography variant="h4" className="ij-bonus-summary__amount">
-          {loading ? '—' : formatRub(summary?.totalBonus ?? 0)}
+        <Typography variant="caption" color="text.secondary">
+          Фонд премий за период (сумма по всем печатникам)
         </Typography>
-        {summary && !loading && (
-          <div className="ij-bonus-summary__meta">
-            <span className="ij-bonus-summary__chip">
-              Смен: {summary.shiftsCount}
-            </span>
-            <span className="ij-bonus-summary__chip ij-bonus-summary__chip--ok">
-              Премиальных: {summary.qualShiftsCount}
-            </span>
-            <span className="ij-bonus-summary__chip">
-              Отработано: {formatMin(summary.ownMinutes)}
-            </span>
-          </div>
-        )}
+        <Typography variant="h4" className="ij-bonus-summary__amount">
+          {loading ? '—' : formatRub(grandTotal)}
+        </Typography>
       </div>
 
-      {!loading && hasData && (
+      {/* Таблица по печатникам */}
+      {!loading && workersReport.length > 0 && (
+        <div className="ij-bonus-summary__workers">
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            className="ij-bonus-summary__workers-label"
+          >
+            По печатникам
+          </Typography>
+          <div className="ij-bonus-summary__workers-list">
+            {workersReport.map((w) => (
+              <div className="ij-bonus-summary__worker" key={w.workerId}>
+                <div className="ij-bonus-summary__worker-main">
+                  <div className="ij-bonus-summary__worker-name">
+                    {w.workerName}
+                  </div>
+                  <div className="ij-bonus-summary__worker-meta">
+                    Смен: {w.shiftsCount} · премиальных: {w.qualShiftsCount}
+                  </div>
+                </div>
+                <div
+                  className={`ij-bonus-summary__worker-amount ${
+                    w.totalBonus > 0 ? 'ij-bonus-summary__worker-amount--ok' : ''
+                  }`}
+                >
+                  {formatRub(w.totalBonus)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* График */}
+      {!loading && hasChart && (
         <div className="ij-bonus-summary__chart">
           <Typography
             variant="caption"
             color="text.secondary"
             className="ij-bonus-summary__chart-label"
           >
-            Премия по сменам, ₽
+            Премия каждому в смене, ₽
           </Typography>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart
-              data={chartData}
+              data={daily}
               margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
             >
               <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -187,7 +219,7 @@ const InkjetBonusSummary = ({ refreshTrigger }: Props) => {
               />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
               <Bar dataKey="dayBonus" name="Премия" radius={[4, 4, 0, 0]}>
-                {chartData.map((entry, index) => (
+                {daily.map((entry, index) => (
                   <Cell
                     key={index}
                     fill={entry.dayBonus > 0 ? '#6366f1' : 'rgba(255,255,255,0.06)'}
@@ -199,10 +231,12 @@ const InkjetBonusSummary = ({ refreshTrigger }: Props) => {
         </div>
       )}
 
-      {!loading && !hasData && !error && (
+      {!loading && workersReport.length === 0 && !error && (
         <div className="ij-bonus-summary__empty">
           <Typography variant="body2" color="text.secondary">
-            Нет данных за расчётный период
+            {allWorkers.length === 0
+              ? 'Справочник печатников пуст — добавьте сотрудников в админке'
+              : 'Нет данных за расчётный период'}
           </Typography>
         </div>
       )}

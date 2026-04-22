@@ -4,9 +4,18 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../app/store';
 import {
   getPrintRunsInPeriod, calcBonuses,
-  getInkjetJobsInPeriod, calcInkjetBonuses,
 } from '../../features/admin';
-import type { UserBonusSummary, InkjetBonusReport } from '../../features/admin';
+import type { UserBonusSummary } from '../../features/admin';
+import {
+  getInkjetPeriodDayStats,
+  getInkjetWorkers,
+  calcInkjetDailyBonuses,
+  calcInkjetWorkerBonuses,
+} from '../../features/inkjet';
+import type {
+  InkjetDailyBonus,
+  InkjetWorkerBonus,
+} from '../../features/inkjet';
 import { AppHeader } from '../../widgets/app-header';
 import { SettingsPanel } from '../../widgets/settings-panel';
 import { InkjetSettingsPanel } from '../../widgets/inkjet-settings-panel';
@@ -224,10 +233,11 @@ const InkjetBonusTable = () => {
     [settings.calculation_day],
   );
 
-  const [report, setReport] = useState<InkjetBonusReport | null>(null);
+  const [daily, setDaily] = useState<InkjetDailyBonus[]>([]);
+  const [workers, setWorkers] = useState<InkjetWorkerBonus[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<string | null>(null); // userId, у которого раскрыты смены
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const fromMs = period.from.getTime();
   const toMs = period.to.getTime();
@@ -236,11 +246,12 @@ const InkjetBonusTable = () => {
     setLoading(true);
     setError(null);
     try {
-      const { jobs, profiles } = await getInkjetJobsInPeriod(
-        new Date(fromMs),
-        new Date(toMs),
-      );
-      setReport(calcInkjetBonuses(jobs, profiles, settings));
+      const [stats, wList] = await Promise.all([
+        getInkjetPeriodDayStats(new Date(fromMs), new Date(toMs)),
+        getInkjetWorkers(),
+      ]);
+      setDaily(calcInkjetDailyBonuses(stats, settings));
+      setWorkers(calcInkjetWorkerBonuses(stats, wList, settings));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка загрузки');
     } finally {
@@ -250,12 +261,14 @@ const InkjetBonusTable = () => {
   }, [fromMs, toMs]);
 
   useEffect(() => {
-    if (!report) return;
+    if (daily.length === 0 && workers.length === 0) return;
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const grandTotal = workers.reduce((s, w) => s + w.totalBonus, 0);
 
   return (
     <div className="bonus-table">
@@ -287,7 +300,8 @@ const InkjetBonusTable = () => {
           R = Σ (приладка + печать + постпечать) всех печатников за день.
           Если R &gt; {formatNum(settings.inkjet_min_total_minutes)} мин →
           премия каждому работнику = ((R / 60) − (кол-во работников × {settings.inkjet_norm_hours_per_worker} ч))
-          × {settings.inkjet_rate_per_hour} ₽
+          × {settings.inkjet_rate_per_hour} ₽.
+          Состав смены берётся из отметок «Кто в смене» в форме ввода.
         </Typography>
       </div>
 
@@ -301,7 +315,7 @@ const InkjetBonusTable = () => {
         </div>
       )}
 
-      {!loading && !error && report && report.users.length === 0 && (
+      {!loading && !error && workers.length === 0 && (
         <div className="bonus-table__empty">
           <Typography variant="body2" color="text.secondary">
             Нет данных за расчётный период
@@ -309,52 +323,49 @@ const InkjetBonusTable = () => {
         </div>
       )}
 
-      {!loading && !error && report && report.users.length > 0 && (
+      {!loading && !error && workers.length > 0 && (
         <div className="bonus-table__wrap">
           <table className="bonus-table__table">
             <thead>
               <tr>
                 <th style={{ width: 32 }}></th>
-                <th>Сотрудник</th>
-                <th className="num" title="Смен в расчётном периоде (всего / премиальных)">Смен</th>
-                <th className="num" title="Суммарное собственное время работника за период">Отработано</th>
+                <th>Печатник</th>
+                <th className="num" title="Смен всего / премиальных">Смен</th>
                 <th className="num total">Премия ₽</th>
               </tr>
             </thead>
             <tbody>
-              {report.users.map((u) => {
-                const isOpen = expanded === u.user.id;
-                const name = u.user.name ?? u.user.email ?? u.user.id;
+              {workers.map((w) => {
+                const isOpen = expanded === w.workerId;
+                const workerDays = daily.filter((d) =>
+                  d.workerIds.includes(w.workerId),
+                );
                 return (
-                  <Fragment key={u.user.id}>
+                  <Fragment key={w.workerId}>
                     <tr
                       className={`bonus-table__row--clickable ${isOpen ? 'bonus-table__row--open' : ''}`}
-                      onClick={() => setExpanded(isOpen ? null : u.user.id)}
+                      onClick={() => setExpanded(isOpen ? null : w.workerId)}
                     >
                       <td className="bonus-table__caret">{isOpen ? '▾' : '▸'}</td>
                       <td>
-                        <div className="bonus-table__name">{name}</div>
-                        {u.user.email && u.user.name && (
-                          <div className="bonus-table__email">{u.user.email}</div>
-                        )}
+                        <div className="bonus-table__name">{w.workerName}</div>
                       </td>
                       <td className="num">
-                        <div>{u.shiftsCount}</div>
+                        <div>{w.shiftsCount}</div>
                         <div className="bonus-table__days">
-                          из них с премией: {u.qualShiftsCount}
+                          с премией: {w.qualShiftsCount}
                         </div>
                       </td>
-                      <td className="num">{formatMinutes(u.ownMinutes)}</td>
                       <td className="num total">
-                        {u.totalBonus > 0
-                          ? formatRub(u.totalBonus)
+                        {w.totalBonus > 0
+                          ? formatRub(w.totalBonus)
                           : <span className="bonus-table__zero">—</span>}
                       </td>
                     </tr>
 
                     {isOpen && (
                       <tr className="bonus-table__details-row">
-                        <td colSpan={5}>
+                        <td colSpan={4}>
                           <div className="bonus-table__details">
                             <table className="bonus-table__details-table">
                               <thead>
@@ -367,13 +378,13 @@ const InkjetBonusTable = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {u.shifts.map((s) => {
+                                {workerDays.map((s) => {
                                   const overHours =
                                     s.totalMinutes / 60 - s.workersCount * settings.inkjet_norm_hours_per_worker;
                                   const belowMin = s.totalMinutes <= settings.inkjet_min_total_minutes;
                                   return (
                                     <tr key={s.dateKey}>
-                                      <td>{s.dateLabel}</td>
+                                      <td>{s.label}</td>
                                       <td className="num">
                                         {formatMinutes(s.totalMinutes)}
                                         {belowMin && (
@@ -392,8 +403,8 @@ const InkjetBonusTable = () => {
                                           : <span className="bonus-table__zero">—</span>}
                                       </td>
                                       <td className="num total">
-                                        {s.perWorkerBonus > 0
-                                          ? formatRub(s.perWorkerBonus)
+                                        {s.dayBonus > 0
+                                          ? formatRub(s.dayBonus)
                                           : <span className="bonus-table__zero">—</span>}
                                       </td>
                                     </tr>
@@ -412,10 +423,9 @@ const InkjetBonusTable = () => {
             <tfoot>
               <tr>
                 <td></td>
-                <td className="bonus-table__foot-label">Выплата по всем сменам</td>
+                <td className="bonus-table__foot-label">Фонд премий (сумма по всем)</td>
                 <td></td>
-                <td></td>
-                <td className="num total">{formatRub(report.grandTotal)}</td>
+                <td className="num total">{formatRub(grandTotal)}</td>
               </tr>
             </tfoot>
           </table>

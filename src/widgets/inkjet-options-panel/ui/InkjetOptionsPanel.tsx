@@ -5,6 +5,7 @@ import type { InkjetOption, InkjetOptionCategory } from '../../../features/inkje
 import './InkjetOptionsPanel.scss';
 
 const CATEGORIES: { key: InkjetOptionCategory; label: string }[] = [
+  { key: 'worker',       label: 'Печатники смены' },
   { key: 'manager',      label: 'Менеджеры' },
   { key: 'product_type', label: 'Типы изделий' },
   { key: 'status',       label: 'Статусы заказов' },
@@ -126,10 +127,10 @@ const InkjetOptionsPanel = () => (
   <Paper className="ij-opt-panel" elevation={0}>
     <div className="ij-opt-panel__header">
       <Typography variant="subtitle2" className="ij-opt-panel__title">
-        Струйная печать — выпадающие списки
+        Струйная печать — справочники
       </Typography>
       <Typography variant="caption" color="text.secondary">
-        Значения Менеджеров, Типов изделий и Статусов для форм ввода
+        Печатники (для состава смены), Менеджеры, Типы изделий и Статусы заказов
       </Typography>
     </div>
 

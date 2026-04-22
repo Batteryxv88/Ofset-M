@@ -34,6 +34,119 @@
     margin: 14px 0 !important;
   }
 
+  // ── Блок «Кто в смене» ────────────────────────────────────
+  &__shift {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+  }
+
+  &__shift-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__shift-title {
+    display: block;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+  }
+
+  &__shift-clear {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.75);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.28);
+      color: #fff;
+    }
+  }
+
+  &__shift-empty {
+    display: block;
+    padding: 6px 0;
+    font-style: italic;
+  }
+
+  &__shift-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__shift-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    &--on {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: #6366f1;
+      color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+  }
+
+  &__shift-chip-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 10px;
+    line-height: 1;
+
+    .ij-form__shift-chip--on & {
+      background: #6366f1;
+      color: #fff;
+    }
+  }
+
+  &__shift-count {
+    display: block;
+    font-size: 12px !important;
+    letter-spacing: 0.02em;
+
+    b {
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+
   // Переключатель УФ / Ширка
   &__tabs {
     display: flex;

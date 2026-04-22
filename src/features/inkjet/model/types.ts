@@ -1,5 +1,5 @@
 export type PrintType = 'uv' | 'wide';
-export type InkjetOptionCategory = 'manager' | 'product_type' | 'status';
+export type InkjetOptionCategory = 'manager' | 'product_type' | 'status' | 'worker';
 
 export type InkjetOption = {
   id: string;
@@ -7,6 +7,9 @@ export type InkjetOption = {
   label: string;
   sort_order: number;
 };
+
+/** Печатник струйной печати — это запись из inkjet_options с категорией 'worker' */
+export type InkjetWorker = InkjetOption & { category: 'worker' };
 
 export type InkjetJob = {
   id: string;
@@ -26,6 +29,8 @@ export type InkjetJob = {
   post_print_minutes: number | null;
   notes: string | null;
   status: string | null;
+  /** ID печатников, которые были в смене в момент создания записи */
+  worker_ids: string[];
   created_at: string;
   updated_at: string;
 };

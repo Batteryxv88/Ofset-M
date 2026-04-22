@@ -1,17 +1,16 @@
 import { supabase } from '../../../shared/api/supabaseClient';
 
 export type InkjetDayStat = {
-  /** ISO date «2026-03-15» */
+  /** ISO date «2026-03-15» в МСК */
   dateKey: string;
   totalMinutes: number;
   workersCount: number;
-  ownMinutes: number;
-  involvesMe: boolean;
+  workerIds: string[];
 };
 
 /**
- * Возвращает агрегаты за каждый день периода, сгруппированные по МСК-дате.
- * Используется для расчёта премии пользователя за расчётный период.
+ * Агрегаты за каждый день периода, сгруппированные по МСК-дате.
+ * Используется и на дашборде работника, и на админке — формула та же.
  */
 export async function getInkjetPeriodDayStats(
   from: Date,
@@ -30,13 +29,11 @@ export async function getInkjetPeriodDayStats(
     day_date: string;
     total_minutes: number;
     workers_count: number;
-    own_minutes: number;
-    involves_me: boolean;
+    worker_ids: string[] | null;
   }>).map((r) => ({
     dateKey: r.day_date,
     totalMinutes: Number(r.total_minutes ?? 0),
     workersCount: Number(r.workers_count ?? 0),
-    ownMinutes: Number(r.own_minutes ?? 0),
-    involvesMe: Boolean(r.involves_me ?? false),
+    workerIds: (r.worker_ids ?? []) as string[],
   }));
 }
