@@ -125,37 +125,7 @@ const InkjetForm = ({ onSaved }: Props) => {
 
   return (
     <Paper className="ij-form" elevation={0}>
-      {/* Заголовок + переключатель типа */}
-      <div className="ij-form__header">
-        <div>
-          <Typography variant="subtitle2" className="ij-form__title">
-            Новое задание
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Заполните параметры и нажмите «Записать»
-          </Typography>
-        </div>
-        <div className="ij-form__tabs">
-          <button
-            type="button"
-            className={`ij-form__tab ${!isWide ? 'ij-form__tab--active' : ''}`}
-            onClick={() => set('print_type', 'uv')}
-          >
-            УФ печать
-          </button>
-          <button
-            type="button"
-            className={`ij-form__tab ${isWide ? 'ij-form__tab--active' : ''}`}
-            onClick={() => set('print_type', 'wide')}
-          >
-            Широкий формат
-          </button>
-        </div>
-      </div>
-
-      <Divider className="ij-form__divider" />
-
-      {/* ── Блок «Кто сегодня в смене» ──────────────────── */}
+      {/* ── Блок «Кто сегодня в смене» — выносим наверх, выделен отдельно ─── */}
       <div className={`ij-form__shift ${shiftEditing ? 'ij-form__shift--editing' : ''}`}>
         <div className="ij-form__shift-head">
           <div className="ij-form__shift-info">
@@ -218,6 +188,36 @@ const InkjetForm = ({ onSaved }: Props) => {
             )}
           </>
         )}
+      </div>
+
+      <Divider className="ij-form__divider" />
+
+      {/* Заголовок + переключатель типа */}
+      <div className="ij-form__header">
+        <div>
+          <Typography variant="subtitle2" className="ij-form__title">
+            Новое задание
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Заполните параметры и нажмите «Записать»
+          </Typography>
+        </div>
+        <div className="ij-form__tabs">
+          <button
+            type="button"
+            className={`ij-form__tab ${!isWide ? 'ij-form__tab--active' : ''}`}
+            onClick={() => set('print_type', 'uv')}
+          >
+            УФ печать
+          </button>
+          <button
+            type="button"
+            className={`ij-form__tab ${isWide ? 'ij-form__tab--active' : ''}`}
+            onClick={() => set('print_type', 'wide')}
+          >
+            Широкий формат
+          </button>
+        </div>
       </div>
 
       <Divider className="ij-form__divider" />
