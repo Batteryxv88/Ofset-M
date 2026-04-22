@@ -95,8 +95,12 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       transition: background 0.12s;
 
+      // Зебра: чётные строки чуть светлее
+      &:nth-child(even) { background: rgba(255, 255, 255, 0.022); }
+      &:nth-child(odd)  { background: transparent; }
+
       &:last-child { border-bottom: none; }
-      &:hover { background: rgba(255, 255, 255, 0.025); }
+      &:hover { background: rgba(99, 102, 241, 0.06); }
     }
 
     td {
@@ -171,6 +175,12 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  // Зебра: через одну карточки чуть светлее
+  &:nth-child(even) {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
 
   &__head {
     display: flex;
