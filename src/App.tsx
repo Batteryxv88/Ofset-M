@@ -29,8 +29,11 @@ function App() {
   useEffect(() => {
     if (!supabase) return;
 
+    let currentUserId: string | null = null;
+
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null;
+      currentUserId = u?.id ?? null;
       dispatch(
         setUser(
           u
@@ -49,8 +52,19 @@ function App() {
       if (u) dispatch(loadProfile(u.id));
     });
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      // События TOKEN_REFRESHED / USER_UPDATED не меняют пользователя —
+      // игнорируем их, иначе role сбрасывается в null и страницу перекидывает.
+      if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') return;
+
       const u = session?.user ?? null;
+      const nextId = u?.id ?? null;
+
+      // Если тот же пользователь (например INITIAL_SESSION при повторном монтировании),
+      // ничего не делаем — профиль уже загружен
+      if (nextId === currentUserId) return;
+
+      currentUserId = nextId;
       dispatch(
         setUser(
           u

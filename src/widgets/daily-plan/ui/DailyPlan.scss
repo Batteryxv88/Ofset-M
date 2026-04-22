@@ -45,12 +45,6 @@
       display: none;
     }
   }
-
-  // Очень узкие (<= ~360) — в столбик
-  @media (max-width: 400px) {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
 }
 
 .daily-plan__item {
@@ -65,14 +59,19 @@
 
   @media (max-width: 600px) {
     padding: 4px 2px;
+    gap: 4px;
   }
 
-  // Ограничение ring внутри grid-item, чтобы не выезжал
+  // Ограничение ring внутри grid-item
   .ring-progress {
     max-width: 120px !important;
 
+    // На мобильном компактный размер — кольца не должны быть огромными
     @media (max-width: 600px) {
-      max-width: 100% !important;
+      max-width: 82px !important;
+    }
+    @media (max-width: 420px) {
+      max-width: 72px !important;
     }
   }
 }
