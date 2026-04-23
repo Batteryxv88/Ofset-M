@@ -4,6 +4,7 @@ import { Button, CircularProgress, Divider, Paper, Typography } from '@mui/mater
 import type { RootState } from '../../../app/store';
 import {
   createInkjetJob,
+  dueFormToIso,
   getInkjetOptions,
   getInkjetWorkers,
   updateTodayJobsWorkers,
@@ -26,6 +27,8 @@ type FormState = {
   product_type: string;
   quantity: string;
   due_date: string;
+  /** Необязательно, формат HH:mm */
+  due_time: string;
   post_print: string;
   setup_min: string;
   print_width_m: string;
@@ -40,7 +43,7 @@ type FormState = {
 const INITIAL: FormState = {
   print_type: 'wide',
   order_number: '', manager: '', product_type: '', quantity: '',
-  due_date: '', post_print: '',
+  due_date: '', due_time: '', post_print: '',
   setup_min: '',
   print_width_m: '', linear_meters: '', table_count: '',
   print_min: '',
@@ -117,7 +120,7 @@ const InkjetForm = ({ onSaved, onShiftChange }: Props) => {
         manager:       blank(form.manager)      ? null : form.manager,
         product_type:  blank(form.product_type) ? null : form.product_type,
         quantity:      blank(form.quantity)     ? null : parseInt(form.quantity, 10),
-        due_date:      blank(form.due_date)     ? null : form.due_date,
+        due_date:      blank(form.due_date) ? null : dueFormToIso(form.due_date, form.due_time),
         post_print:    blank(form.post_print)   ? null : form.post_print,
         setup_minutes: toMin(form.setup_min),
         print_width_m: form.print_type === 'wide' && !blank(form.print_width_m)
@@ -293,13 +296,27 @@ const InkjetForm = ({ onSaved, onShiftChange }: Props) => {
           />
         </div>
         <div className="ij-form__field">
-          <label className="ij-form__label">Дата сдачи</label>
-          <input
-            type="date"
-            className="ij-form__input ij-form__input--date"
-            value={form.due_date}
-            onChange={(e) => set('due_date', e.target.value)}
-          />
+          <label className="ij-form__label">Срок сдачи</label>
+          <div className="ij-form__due-inputs">
+            <input
+              type="date"
+              className="ij-form__input ij-form__input--date ij-form__input--due-date"
+              value={form.due_date}
+              onChange={(e) => {
+                const v = e.target.value;
+                setForm((p) => ({ ...p, due_date: v, due_time: v ? p.due_time : '' }));
+              }}
+            />
+            <input
+              type="time"
+              className="ij-form__input ij-form__input--date ij-form__input--time ij-form__input--due-time"
+              value={form.due_time}
+              onChange={(e) => set('due_time', e.target.value)}
+              disabled={!form.due_date}
+              title="Время — по желанию"
+              aria-label="Время сдачи, необязательно"
+            />
+          </div>
         </div>
         <div className="ij-form__field">
           <label className="ij-form__label">Статус заказа</label>

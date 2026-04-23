@@ -3,7 +3,14 @@ import {
   Button, CircularProgress, Dialog, DialogActions, DialogContent,
   DialogTitle, Divider, Menu, MenuItem, Paper, Tooltip, Typography, useMediaQuery,
 } from '@mui/material';
-import { getMyInkjetJobs, getInkjetOptions, updateInkjetJob } from '../../../features/inkjet';
+import {
+  dueFormToIso,
+  dueValueToForm,
+  formatDueShortRu,
+  getInkjetOptions,
+  getMyInkjetJobs,
+  updateInkjetJob,
+} from '../../../features/inkjet';
 import type { InkjetJob, InkjetOption } from '../../../features/inkjet';
 import { ComboBox } from '../../../shared/ui/combo-box';
 import './InkjetJobs.scss';
@@ -174,7 +181,9 @@ const NotesIcon = ({ job }: { job: InkjetJob }) => {
 // ── Edit Dialog ────────────────────────────────────────────────
 type EditState = {
   manager: string; product_type: string; quantity: string;
-  due_date: string; post_print: string;
+  due_date: string;
+  due_time: string;
+  post_print: string;
   setup_min: string;
   print_width_m: string; linear_meters: string; table_count: string;
   print_min: string;
@@ -183,11 +192,13 @@ type EditState = {
 };
 
 function jobToEdit(job: InkjetJob): EditState {
+  const due = dueValueToForm(job.due_date);
   return {
     manager:       job.manager       ?? '',
     product_type:  job.product_type  ?? '',
     quantity:      job.quantity      != null ? String(job.quantity)      : '',
-    due_date:      job.due_date      ?? '',
+    due_date:      due.date,
+    due_time:      due.time,
     post_print:    job.post_print    ?? '',
     setup_min:     job.setup_minutes != null ? String(job.setup_minutes) : '',
     print_width_m: job.print_width_m != null ? String(job.print_width_m)  : '',
@@ -225,7 +236,7 @@ const EditDialog = ({
         manager:       form.manager      || null,
         product_type:  form.product_type || null,
         quantity:      form.quantity     ? parseInt(form.quantity, 10)      : null,
-        due_date:      form.due_date     || null,
+        due_date:      form.due_date ? dueFormToIso(form.due_date, form.due_time) : null,
         post_print:    form.post_print   || null,
         setup_minutes: toMin(form.setup_min),
         print_width_m: form.print_width_m ? parseFloat(form.print_width_m) : null,
@@ -297,9 +308,27 @@ const EditDialog = ({
               value={form.quantity} onChange={(e) => set('quantity', e.target.value)} />
           </div>
           <div className="ij-edit__field">
-            <label className="ij-edit__label">Дата сдачи</label>
-            <input type="date" className="ij-edit__input ij-edit__input--date"
-              value={form.due_date} onChange={(e) => set('due_date', e.target.value)} />
+            <label className="ij-edit__label">Срок сдачи</label>
+            <div className="ij-edit__due-inputs">
+              <input
+                type="date"
+                className="ij-edit__input ij-edit__input--date ij-edit__input--due-date"
+                value={form.due_date}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setForm((p) => ({ ...p, due_date: v, due_time: v ? p.due_time : '' }));
+                }}
+              />
+              <input
+                type="time"
+                className="ij-edit__input ij-edit__input--date ij-edit__input--time ij-edit__input--due-time"
+                value={form.due_time}
+                onChange={(e) => set('due_time', e.target.value)}
+                disabled={!form.due_date}
+                title="Время — по желанию"
+                aria-label="Время сдачи, необязательно"
+              />
+            </div>
           </div>
           <div className="ij-edit__field">
             <label className="ij-edit__label">Статус</label>
@@ -490,9 +519,7 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                       </div>
                     </td>
                     <td>
-                      {job.due_date
-                        ? new Date(job.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-                        : '—'}
+                      {job.due_date ? formatDueShortRu(job.due_date) : '—'}
                     </td>
                     <td className="num">{job.print_width_m  != null ? `${job.print_width_m} м`  : '—'}</td>
                     <td className="num">{job.linear_meters   != null ? `${job.linear_meters} м`  : '—'}</td>
@@ -552,7 +579,7 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                   </div>
                   {job.due_date && (
                     <span className="ij-card__due">
-                      до {new Date(job.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                      до {formatDueShortRu(job.due_date)}
                     </span>
                   )}
                 </div>

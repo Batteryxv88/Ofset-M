@@ -24,6 +24,8 @@ export type { InkjetDayStat } from './api/getInkjetPeriodDayStats';
 // Локальное состояние «кто в смене сегодня»
 export { useInkjetShift } from './lib/useInkjetShift';
 
+export { dueFormToIso, dueValueToForm, formatDueShortRu } from './lib/dueDate';
+
 // Расчёты премии
 export {
   calcInkjetDailyBonuses,

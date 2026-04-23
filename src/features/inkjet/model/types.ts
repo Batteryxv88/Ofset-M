@@ -19,6 +19,7 @@ export type InkjetJob = {
   manager: string | null;
   product_type: string | null;
   quantity: number | null;
+  /** Срок сдачи: ISO timestamptz (или только календарный день — полночь локально). */
   due_date: string | null;
   post_print: string | null;
   setup_minutes: number | null;

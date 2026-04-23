@@ -51,7 +51,7 @@ create table if not exists public.inkjet_jobs (
   manager             text,
   product_type        text,
   quantity            int,
-  due_date            date,
+  due_date            timestamptz,
   post_print          text,
   setup_minutes       int,          -- приладка, в минутах
 
