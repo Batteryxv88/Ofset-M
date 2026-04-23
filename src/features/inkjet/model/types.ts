@@ -30,10 +30,15 @@ export type InkjetJob = {
   post_print_minutes: number | null;
   notes: string | null;
   status: string | null;
+  /** Момент последнего перевода в «Выполнен»; задаётся триггером в БД. */
+  completed_at: string | null;
   /** ID печатников, которые были в смене в момент создания записи */
   worker_ids: string[];
   created_at: string;
   updated_at: string;
 };
 
-export type CreateInkjetJobData = Omit<InkjetJob, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type CreateInkjetJobData = Omit<
+  InkjetJob,
+  'id' | 'user_id' | 'created_at' | 'updated_at' | 'completed_at'
+>;

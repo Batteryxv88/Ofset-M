@@ -91,6 +91,14 @@
       &.act { width: 36px; }
     }
 
+    th.ij-jobs__col-dt,
+    td.ij-jobs__col-dt {
+      white-space: normal;
+      max-width: 9.5rem;
+      line-height: 1.25;
+      font-size: 12px;
+    }
+
     tbody tr {
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       transition: background 0.12s;

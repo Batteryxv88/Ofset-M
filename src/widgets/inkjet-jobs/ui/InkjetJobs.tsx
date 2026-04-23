@@ -25,6 +25,20 @@ function toMin(v: string): number | null {
   return v && !isNaN(n) && n > 0 ? n : null;
 }
 
+/** Дата и время для списка заданий (локаль пользователя). */
+function formatJobDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString('ru-RU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 const STATUS_COLORS: Record<string, string> = {
   'В работе': 'var(--ij-status-active)',
   'Выполнен': 'var(--ij-status-done)',
@@ -489,8 +503,10 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                   <th>Изделие</th>
                   <th className="num">Тираж</th>
                   <th>Менеджер</th>
+                  <th className="ij-jobs__col-dt">Поставлен</th>
                   <th>Статус</th>
                   <th>Сдача</th>
+                  <th className="ij-jobs__col-dt">Завершён</th>
                   <th className="num">Ширина</th>
                   <th className="num">Погон. м</th>
                   <th className="num">Столов</th>
@@ -512,6 +528,7 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                     <td>{job.product_type ?? '—'}</td>
                     <td className="num">{job.quantity ?? '—'}</td>
                     <td>{job.manager ?? '—'}</td>
+                    <td className="ij-jobs__col-dt">{formatJobDateTime(job.created_at)}</td>
                     <td>
                       <div className="ij-jobs__status-cell">
                         <QuickStatus job={job} statuses={statuses} onChanged={load} />
@@ -520,6 +537,9 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                     </td>
                     <td>
                       {job.due_date ? formatDueShortRu(job.due_date) : '—'}
+                    </td>
+                    <td className="ij-jobs__col-dt">
+                      {job.completed_at ? formatJobDateTime(job.completed_at) : '—'}
                     </td>
                     <td className="num">{job.print_width_m  != null ? `${job.print_width_m} м`  : '—'}</td>
                     <td className="num">{job.linear_meters   != null ? `${job.linear_meters} м`  : '—'}</td>
@@ -597,6 +617,16 @@ const InkjetJobs = ({ userId, refreshTrigger = 0 }: Props) => {
                   <div className="ij-card__cell ij-card__cell--full">
                     <span className="ij-card__label">Менеджер</span>
                     <span className="ij-card__value">{job.manager ?? '—'}</span>
+                  </div>
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Поставлен</span>
+                    <span className="ij-card__value">{formatJobDateTime(job.created_at)}</span>
+                  </div>
+                  <div className="ij-card__cell">
+                    <span className="ij-card__label">Завершён</span>
+                    <span className="ij-card__value">
+                      {job.completed_at ? formatJobDateTime(job.completed_at) : '—'}
+                    </span>
                   </div>
                 </div>
 

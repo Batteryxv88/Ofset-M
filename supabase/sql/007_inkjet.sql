@@ -69,7 +69,8 @@ create table if not exists public.inkjet_jobs (
   status              text          default 'В работе',
 
   created_at          timestamptz   not null default now(),
-  updated_at          timestamptz   not null default now()
+  updated_at          timestamptz   not null default now(),
+  completed_at        timestamptz
 );
 
 alter table public.inkjet_jobs enable row level security;
@@ -90,3 +91,36 @@ with check (user_id = auth.uid());
 create policy "inkjet_jobs: admin select all"
 on public.inkjet_jobs for select to authenticated
 using (public.is_admin());
+
+-- completed_at: при входе в «Выполнен» — now(), при уходе — null (полная логика в 013 для старых БД)
+create or replace function public.inkjet_jobs_set_completed_at()
+returns trigger
+language plpgsql
+as $f$
+begin
+  if tg_op = 'INSERT' then
+    if new.status is not distinct from 'Выполнен' then
+      new.completed_at := now();
+    else
+      new.completed_at := null;
+    end if;
+    return new;
+  end if;
+
+  if new.status is distinct from 'Выполнен' then
+    new.completed_at := null;
+  elsif old.status is distinct from 'Выполнен' then
+    new.completed_at := now();
+  else
+    new.completed_at := old.completed_at;
+  end if;
+  return new;
+end;
+$f$;
+
+drop trigger if exists inkjet_jobs_completed_at_biub on public.inkjet_jobs;
+
+create trigger inkjet_jobs_completed_at_biub
+before insert or update on public.inkjet_jobs
+for each row
+execute function public.inkjet_jobs_set_completed_at();
